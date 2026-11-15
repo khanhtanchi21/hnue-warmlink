@@ -1,6 +1,38 @@
 (function () {
   'use strict';
 
+  // 0. Cấu hình kết nối Firebase Realtime Database (Dự án: hnue-warmlink)
+  const firebaseConfig = {
+    apiKey: "AIzaSyCV3MdX8zQ1bPpYocMphIDubr_KpZnmnEc",
+    authDomain: "hnue-warmlink.firebaseapp.com",
+    databaseURL: "https://hnue-warmlink-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "hnue-warmlink",
+    storageBucket: "hnue-warmlink.firebasestorage.app",
+    messagingSenderId: "462605682082",
+    appId: "1:462605682082:web:812168b291174b181c1efb",
+    measurementId: "G-ELBFFLS61V"
+  };
+
+  let rtdb = null;
+  if (typeof firebase !== 'undefined' && firebaseConfig.apiKey) {
+    try {
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      rtdb = firebase.database();
+    } catch (err) {
+      console.error('Lỗi khởi tạo Firebase:', err);
+    }
+  }
+
+  // Mã định danh duy nhất cho từng thiết bị người dùng
+  const UID_KEY = 'hnue_warmlink_device_uid';
+  let myUid = localStorage.getItem(UID_KEY);
+  if (!myUid) {
+    myUid = 'user_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 7);
+    localStorage.setItem(UID_KEY, myUid);
+  }
+
   // 1. Tọa độ chuẩn các khu vực tại Trường Đại học Sư phạm Hà Nội
   const HNUE_LANDMARKS = [
     { name: 'Ký túc xá ĐHSP Hà Nội (Nhà B2)', lat: 21.0389, lng: 105.7819 },
@@ -11,7 +43,7 @@
   ];
 
   // 2. State ứng dụng lưu trên LocalStorage
-  const STORAGE_KEY = 'hnue_warmlink_production_v1';
+  const STORAGE_KEY = 'hnue_warmlink_production_v2';
   const defaultState = {
     studentName: 'Nguyễn Minh Anh',
     studentEmail: 'minhanh.k72@hnue.edu.vn',
@@ -61,10 +93,10 @@
     mobileToast.textContent = msg;
     mobileToast.classList.add('show');
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => mobileToast.classList.remove('show'), 3200);
+    toastTimer = setTimeout(() => mobileToast.classList.remove('show'), 3600);
   }
 
-  // 4. Hệ thống định vị GPS & công thức Haversine
+  // 4. Hệ thống định vị GPS & đồng bộ thời gian thực qua Firebase
   const gpsState = {
     isLive: false,
     lat: 21.0389,
@@ -74,43 +106,96 @@
     beaconOn: false
   };
 
-  const tabId = 'peer-' + Math.random().toString(36).slice(2, 8);
-  const liveChannel = 'BroadcastChannel' in window ? new BroadcastChannel('hnue_warmlink_live_gps') : null;
-  const liveTabPeers = {};
+  const remoteBeacons = {};
+  const remoteSosSignals = {};
+  let lastNotifiedSosKey = '';
 
-  function broadcastMyBeacon() {
-    if (!liveChannel) return;
-    liveChannel.postMessage({
-      type: gpsState.beaconOn ? 'BEACON_PING' : 'BEACON_OFF',
-      tabId,
-      name: appState.studentName,
-      faculty: appState.studentFaculty,
-      lat: gpsState.lat,
-      lng: gpsState.lng
-    });
+  function syncMyBeaconToCloud() {
+    if (!rtdb) return;
+    const myBeaconRef = rtdb.ref('beacons/' + myUid);
+    if (gpsState.beaconOn) {
+      myBeaconRef.onDisconnect().remove();
+      myBeaconRef.set({
+        uid: myUid,
+        name: appState.studentName,
+        faculty: appState.studentFaculty,
+        lat: gpsState.lat,
+        lng: gpsState.lng,
+        isLiveGps: gpsState.isLive,
+        updatedAt: firebase.database.ServerValue.TIMESTAMP
+      });
+    } else {
+      myBeaconRef.remove();
+    }
   }
 
-  if (liveChannel) {
-    liveChannel.onmessage = (ev) => {
-      const d = ev.data || {};
-      if (!d.tabId || d.tabId === tabId) return;
-      if (d.type === 'BEACON_OFF') {
-        delete liveTabPeers[d.tabId];
-      } else if (d.type === 'BEACON_PING') {
-        liveTabPeers[d.tabId] = {
-          id: d.tabId,
-          initials: d.name.split(' ').slice(-2).map((w) => w[0]).join('').toUpperCase(),
-          name: d.name + ' (Trực tuyến)',
-          faculty: d.faculty,
-          skill: 'Đang trực tuyến hỗ trợ',
-          rating: '5.0★',
-          realLat: d.lat,
-          realLng: d.lng,
-          confirmed: false
-        };
-      }
+  // Lắng nghe dữ liệu người dùng thật từ Firebase Realtime Database
+  if (rtdb) {
+    // 1. Lắng nghe các "Người Thắp Lửa" đang bật vị trí
+    rtdb.ref('beacons').on('value', (snap) => {
+      const data = snap.val() || {};
+      const now = Date.now();
+      Object.keys(remoteBeacons).forEach((k) => delete remoteBeacons[k]);
+
+      Object.keys(data).forEach((uid) => {
+        if (uid === myUid) return;
+        const item = data[uid];
+        if (item && typeof item.lat === 'number' && (!item.updatedAt || now - item.updatedAt < 900000)) {
+          const initials = (item.name || 'SV')
+            .split(' ')
+            .slice(-2)
+            .map((w) => w[0] || '')
+            .join('')
+            .toUpperCase();
+
+          remoteBeacons[uid] = {
+            id: uid,
+            uid: uid,
+            isRealUser: true,
+            initials: initials || 'SV',
+            name: item.name + ' (Trực tuyến)',
+            faculty: item.faculty || 'Cộng đồng HNUE',
+            skill: 'Người Thắp Lửa đang trực tuyến',
+            rating: '5.0★',
+            realLat: item.lat,
+            realLng: item.lng,
+            confirmed: false
+          };
+        }
+      });
+
       renderRadarAndNearbyList();
-    };
+    });
+
+    // 2. Lắng nghe tín hiệu SOS khẩn cấp từ các thiết bị khác
+    rtdb.ref('sos_signals').on('value', (snap) => {
+      const data = snap.val() || {};
+      const now = Date.now();
+      Object.keys(remoteSosSignals).forEach((k) => delete remoteSosSignals[k]);
+
+      let newestSos = null;
+      Object.keys(data).forEach((uid) => {
+        if (uid === myUid) return;
+        const sos = data[uid];
+        if (sos && (!sos.createdAt || now - sos.createdAt < 1800000)) {
+          remoteSosSignals[uid] = sos;
+          if (!newestSos || (sos.createdAt || 0) > (newestSos.createdAt || 0)) {
+            newestSos = sos;
+          }
+        }
+      });
+
+      if (newestSos) {
+        const key = newestSos.uid + '_' + (newestSos.createdAt || '');
+        if (key !== lastNotifiedSosKey) {
+          lastNotifiedSosKey = key;
+          const dist = haversineMeters(gpsState.lat, gpsState.lng, newestSos.lat, newestSos.lng);
+          notify(`🆘 ${newestSos.name} cách bạn ~${dist}m đang cần hỗ trợ (${newestSos.group})!`);
+        }
+      }
+
+      renderIncomingSosList();
+    });
   }
 
   const nearbyPeers = [
@@ -245,7 +330,8 @@
     }
 
     document.getElementById('radarGpsExact').textContent = `Lat: ${latStr} | Lng: ${lngStr} (${accStr})`;
-    broadcastMyBeacon();
+    syncMyBeaconToCloud();
+    renderIncomingSosList();
     renderRadarAndNearbyList();
   }
 
@@ -273,7 +359,7 @@
         updateGpsDisplays();
 
         if (firstTime) {
-          notify('✓ Đã bật GPS thật! Đang quét người xung quanh bán kính 500m.');
+          notify('✓ Đã bật GPS thật! Đang quét cộng đồng xung quanh bán kính 500m.');
         }
       },
       (err) => {
@@ -298,10 +384,11 @@
   volunteerBeaconSwitch.addEventListener('click', () => {
     gpsState.beaconOn = !gpsState.beaconOn;
     volunteerBeaconSwitch.classList.toggle('on', gpsState.beaconOn);
-    broadcastMyBeacon();
+    syncMyBeaconToCloud();
+
     if (gpsState.beaconOn) {
       if (!gpsState.isLive) activateRealGeolocation();
-      notify('🔥 Đã bật chế độ “Người Thắp Lửa”! Mọi người quanh 500m có thể kết nối với bạn.');
+      notify('🔥 Đã bật “Người Thắp Lửa”! Vị trí của bạn đang chia sẻ trực tiếp cho mọi người xung quanh.');
     } else {
       notify('Đã tắt trạng thái trực tuyến Người Thắp Lửa.');
     }
@@ -312,16 +399,76 @@
       p.dNorth += (Math.random() - 0.5) * 3;
       p.dEast += (Math.random() - 0.5) * 3;
     });
-    if (gpsState.beaconOn) broadcastMyBeacon();
+    if (gpsState.beaconOn) syncMyBeaconToCloud();
     if (document.getElementById('page-radar-500m').classList.contains('active')) {
       renderRadarAndNearbyList();
     }
-  }, 4000);
+  }, 6000);
+
+  // Hiển thị các yêu cầu SOS thật từ người dùng khác gửi lên Firebase
+  function renderIncomingSosList() {
+    const container = document.getElementById('incomingSosContainer');
+    if (!container) return;
+
+    const list = Object.values(remoteSosSignals)
+      .map((sos) => {
+        const distM = haversineMeters(gpsState.lat, gpsState.lng, sos.lat, sos.lng);
+        const bearing = getBearingDeg(gpsState.lat, gpsState.lng, sos.lat, sos.lng);
+        const dirText = bearingToDirection(bearing);
+        return Object.assign({}, sos, { distM, dirText });
+      })
+      .sort((a, b) => a.distM - b.distM);
+
+    if (!list.length) {
+      container.innerHTML = '';
+      return;
+    }
+
+    container.innerHTML = list
+      .map(
+        (sos) => `
+        <div class="vol-card" style="border-color: var(--rose-500); background: var(--rose-50);">
+          <div class="vol-card-top">
+            <div>
+              <div class="vol-title" style="color: var(--rose-600);">🆘 ${sos.name} cần hỗ trợ</div>
+              <div class="vol-sub" style="color: var(--navy-900); font-weight: 700;">${sos.group} • ${sos.area}</div>
+              <div class="vol-sub" style="color: var(--slate-700); margin-top: 4px;">“${sos.message}”</div>
+              <div class="vol-gps-meta">GPS: ${sos.lat.toFixed(5)}°N, ${sos.lng.toFixed(5)}°E • Hướng ${sos.dirText}</div>
+            </div>
+            <span class="vol-dist-tag" style="background: #fff; color: var(--rose-600);">${sos.distM}m</span>
+          </div>
+          <div class="vol-card-actions" style="grid-template-columns: 1fr;">
+            <button type="button" class="btn-confirm-qr" data-sos-uid="${sos.uid}">
+              💬 Tiếp nhận hỗ trợ &amp; Nhắn tin ngay
+            </button>
+          </div>
+        </div>
+      `
+      )
+      .join('');
+
+    container.querySelectorAll('[data-sos-uid]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const sos = list.find((x) => x.uid === btn.getAttribute('data-sos-uid'));
+        if (sos) {
+          openSafeChat({
+            id: sos.uid,
+            uid: sos.uid,
+            isRealUser: true,
+            name: sos.name,
+            faculty: sos.faculty || 'Cộng đồng HNUE',
+            distM: sos.distM,
+            dirText: sos.dirText
+          });
+        }
+      });
+    });
+  }
 
   // 5. Render Radar 500m + Bản đồ GPS + Danh sách tình nguyện viên
   function getAllCombinedPeers() {
-    const all = nearbyPeers.slice();
-    Object.values(liveTabPeers).forEach((tp) => all.push(tp));
+    const all = Object.values(remoteBeacons);
+    nearbyPeers.forEach((p) => all.push(p));
     return all;
   }
 
@@ -350,7 +497,11 @@
         });
       })
       .filter((p) => p.distM <= currentMaxDist)
-      .sort((a, b) => a.distM - b.distM);
+      .sort((a, b) => {
+        if (a.isRealUser && !b.isRealUser) return -1;
+        if (!a.isRealUser && b.isRealUser) return 1;
+        return a.distM - b.distM;
+      });
 
     document.getElementById('nearbyCountBadge').textContent = `${enriched.length} người xung quanh`;
 
@@ -364,11 +515,14 @@
       const leftPct = 50 + Math.sin(rad) * ratio * 44;
       const topPct = 50 - Math.cos(rad) * ratio * 44;
       const isSel = p.id === selectedPeerId ? 'is-selected' : '';
+      const dotStyle = p.isRealUser
+        ? 'background: #10b981; box-shadow: 0 0 16px #10b981;'
+        : '';
 
       radarHtml += `
         <div class="dynamic-vol-blip ${isSel}" data-peer-id="${p.id}" style="left: ${leftPct.toFixed(1)}%; top: ${topPct.toFixed(1)}%;">
-          <div class="blip-dot"></div>
-          <span class="blip-label">${p.name.split(' ').slice(-2).join(' ')} • ${p.distM}m</span>
+          <div class="blip-dot" style="${dotStyle}"></div>
+          <span class="blip-label">${p.name.replace(' (Trực tuyến)', '').split(' ').slice(-2).join(' ')} • ${p.distM}m</span>
         </div>
       `;
 
@@ -383,7 +537,7 @@
         <div class="vol-card ${p.id === selectedPeerId ? 'is-highlighted' : ''}" id="card-${p.id}">
           <div class="vol-card-top">
             <div class="vol-left">
-              <div class="vol-badge-avatar">${p.initials}</div>
+              <div class="vol-badge-avatar" style="${p.isRealUser ? 'background: var(--emerald-100); color: var(--emerald-700);' : ''}">${p.initials}</div>
               <div>
                 <div class="vol-title">${p.name} <span style="font-size: 0.7rem; color: var(--amber-700);">${p.rating}</span></div>
                 <div class="vol-sub">${p.faculty} • ${p.skill}</div>
@@ -430,7 +584,7 @@
     document.querySelectorAll('.btn-confirm-qr').forEach((btn) => {
       btn.addEventListener('click', () => {
         const targetId = btn.getAttribute('data-qr-id');
-        const peer = nearbyPeers.find((x) => x.id === targetId) || liveTabPeers[targetId];
+        const peer = nearbyPeers.find((x) => x.id === targetId) || remoteBeacons[targetId];
         if (!peer) return;
         if (peer.confirmed) {
           window.location.hash = '#/chung-nhan';
@@ -451,6 +605,11 @@
           time: timeStr,
           code: 'QR-' + Math.floor(1000 + Math.random() * 9000)
         });
+
+        // Xóa tín hiệu SOS của mình trên Firebase sau khi đã được hỗ trợ xong
+        if (rtdb) {
+          rtdb.ref('sos_signals/' + myUid).remove();
+        }
 
         saveState();
         syncAllUserUI();
@@ -627,40 +786,98 @@
     appState.message = sosMessageInput.value.trim();
     saveState();
 
+    // Phát tín hiệu SOS lên Firebase để mọi thiết bị xung quanh nhận được
+    if (rtdb) {
+      const sosRef = rtdb.ref('sos_signals/' + myUid);
+      sosRef.onDisconnect().remove();
+      sosRef.set({
+        uid: myUid,
+        name: appState.studentName,
+        faculty: appState.studentFaculty,
+        group: appState.group,
+        area: appState.area,
+        message: appState.message,
+        lat: gpsState.lat,
+        lng: gpsState.lng,
+        createdAt: firebase.database.ServerValue.TIMESTAMP
+      });
+    }
+
     if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
-    notify('🔥 Đã phát tín hiệu kèm vị trí! Đang tìm người hỗ trợ quanh 500m...');
+    notify('🔥 Đã phát tín hiệu kèm tọa độ GPS lên hệ thống! Đang tìm người hỗ trợ...');
     window.location.hash = '#/radar-500m';
   });
 
-  // 9. Chat an toàn trong ứng dụng
+  // 9. Chat an toàn thời gian thực giữa 2 người dùng
   const safeChatModal = document.getElementById('safeChatModal');
   const chatMessagesBox = document.getElementById('chatMessagesBox');
   const chatInputBox = document.getElementById('chatInputBox');
   let activeChatPeer = null;
+  let activeChatRef = null;
 
   function openSafeChat(peer) {
     activeChatPeer = peer;
+    if (activeChatRef) {
+      activeChatRef.off();
+      activeChatRef = null;
+    }
+
     document.getElementById('chatPartnerName').textContent = `${peer.name} (${peer.distM}m)`;
     document.getElementById('chatPartnerMeta').textContent = `✓ ${peer.faculty} • Bảo mật số điện thoại`;
     const shortName = appState.studentName.split(' ').slice(-1)[0];
+
     chatMessagesBox.innerHTML = `
       <div class="chat-bubble incoming">
-        Chào ${shortName}, mình đang ở cách bạn ${peer.distM}m (hướng ${peer.dirText}). Mình nhận được yêu cầu "${appState.group}" của bạn rồi, mình qua hỗ trợ ngay nhé!
+        Kết nối an toàn đã sẵn sàng với ${peer.name} (cách ${peer.distM}m, hướng ${peer.dirText}).
       </div>
     `;
+
+    // Đồng bộ tin nhắn 2 chiều thời gian thực qua Firebase
+    if (rtdb && peer.isRealUser && peer.uid) {
+      const roomId = [myUid, peer.uid].sort().join('__');
+      activeChatRef = rtdb.ref('chats/' + roomId + '/messages').limitToLast(40);
+      activeChatRef.on('child_added', (snap) => {
+        const msg = snap.val();
+        if (!msg) return;
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'chat-bubble ' + (msg.senderUid === myUid ? 'outgoing' : 'incoming');
+        msgDiv.textContent = msg.text;
+        chatMessagesBox.appendChild(msgDiv);
+        chatMessagesBox.scrollTop = chatMessagesBox.scrollHeight;
+      });
+    } else {
+      chatMessagesBox.innerHTML = `
+        <div class="chat-bubble incoming">
+          Chào ${shortName}, mình đang ở cách bạn ${peer.distM}m (hướng ${peer.dirText}). Mình nhận được yêu cầu "${appState.group}" của bạn rồi, mình qua hỗ trợ ngay nhé!
+        </div>
+      `;
+    }
+
     safeChatModal.classList.add('open');
   }
 
   function sendChatMessage(text) {
     const clean = (text || '').trim();
-    if (!clean) return;
+    if (!clean || !activeChatPeer) return;
     const masked = clean.replace(/(0\d{2})\d{4}(\d{3})/g, '$1****$2');
+    chatInputBox.value = '';
+
+    if (rtdb && activeChatPeer.isRealUser && activeChatPeer.uid) {
+      const roomId = [myUid, activeChatPeer.uid].sort().join('__');
+      rtdb.ref('chats/' + roomId + '/messages').push({
+        senderUid: myUid,
+        senderName: appState.studentName,
+        text: masked,
+        createdAt: firebase.database.ServerValue.TIMESTAMP
+      });
+      return;
+    }
+
     const msgDiv = document.createElement('div');
     msgDiv.className = 'chat-bubble outgoing';
     msgDiv.textContent = masked;
     chatMessagesBox.appendChild(msgDiv);
     chatMessagesBox.scrollTop = chatMessagesBox.scrollHeight;
-    chatInputBox.value = '';
 
     setTimeout(() => {
       if (!activeChatPeer) return;
@@ -679,7 +896,13 @@
   document.querySelectorAll('.chat-quick-btn').forEach((b) => {
     b.addEventListener('click', () => sendChatMessage(b.textContent));
   });
-  document.getElementById('closeChatModalBtn').addEventListener('click', () => safeChatModal.classList.remove('open'));
+  document.getElementById('closeChatModalBtn').addEventListener('click', () => {
+    if (activeChatRef) {
+      activeChatRef.off();
+      activeChatRef = null;
+    }
+    safeChatModal.classList.remove('open');
+  });
 
   // 10. Modal Thông tin cá nhân
   const profileModal = document.getElementById('profileModal');
@@ -707,7 +930,7 @@
     appState.studentFaculty = faculty;
     saveState();
     syncAllUserUI();
-    broadcastMyBeacon();
+    syncMyBeaconToCloud();
     profileModal.classList.remove('open');
     notify(`✓ Đã cập nhật thông tin cho ${name}!`);
   });
@@ -891,7 +1114,7 @@
 
   const initialUrl = window.location.protocol.startsWith('http')
     ? window.location.href.split('#')[0]
-    : 'https://hnue-warmlink.netlify.app';
+    : 'https://khanhtanchi21.github.io/hnue-warmlink/';
   customMvpLinkInput.value = initialUrl;
 
   let qrMatrix = [];
