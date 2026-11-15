@@ -1,0 +1,10 @@
+{
+  "name": "HNUE WarmLink – Đốm Lửa Sẻ Chia",
+  "short_name": "HNUE WarmLink",
+  "description": "Kết nối hỗ trợ khẩn cấp và lan tỏa hành động đẹp trong cộng đồng ĐHSP Hà Nội.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#ea580c",
+  "orientation": "portrait"
+}

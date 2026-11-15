@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#ea580c" />
+  <meta name="description" content="HNUE WarmLink – Nền tảng kết nối hỗ trợ khẩn cấp và lan tỏa hành động đẹp trong cộng đồng ĐHSP Hà Nội." />
+  <title>HNUE WarmLink – Đốm Lửa Sẻ Chia</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="data:image/png;base64,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" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="mobile-app-shell">
+
+    <!-- HEADER -->
+    <header class="app-header">
+      <div class="app-header-row">
+        <a href="#/phat-tin-hieu" class="app-brand">
+          <div class="app-logo-mark">
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKYAAACmCAMAAABnVgRFAAAAzFBMVEUYOIX////+/v4XN4a4w9Hx8vUMMYIAKnYPM4Pn6+41To45UIdlc5kDL4EALXzh5On3+PlQYpORmrHW2+MALIAKNH2WobvIztkAKHlEV4UtR4QAInQAIX2kr8N0gqIkPnMhOnRdbZZAWpmttcKDj6gnQoMbOn4AJn2JlLGdqMcrRHdSZY9+i6m2vM08V40AKW80THwAAGUAIWxfcqUlQYppd5YAFG+dp7ZaaoxDV34ALnCIl7tLYZx6irKnss4AK2QAAHZvfZGJkqFsfapEEAkyAAAV3ElEQVR4nM1dC2OiurZGAhjKI0iA8CiMDIpuAfW0w9h29p57z5n//59uAloRH43amXPX3nv2tEr4SNY7Kwth8AlkyQiTeJKkr+vFlzGlL4t18JLYsYSRbH3GHYS7EeLKK1MtNyPfN6AAABDYHwCapu8Pcy0tvQqr92K9C6aKszJd5NAwIBROEYAK/cxdFGWG1f8KTBlJ81E+mxls+i4TAMYsykcTCcl/GKYqlaOpYpyew9NYDRiOSgn9OZginoymEH44i8csAKejCRb/CEy1Sl1HuRrjFqniuGl1PZteC1P1RqZzxVqfQGqYI+9aoNfBxLZm3jqR3Sk1NQ9dtfZXwBRx/DC7niNPA/Uf4muYlB+mtSlc4zMwtmQIo5hfP/HCtKriE5a7S3Tpi4rXOnHCREn+uSBboHnCqUf5YMaB+ekgGUEziD8LpojrJ/d3gGSkRDqPKH0M08oC83eBpAT8IPuYQz+EKdu/gSsPCOb2hyL/EUyS+nfZHB4CfkrugimS3yQ7PZxwKV1m0IswxThUfj9IRnCRXcR5CaZV+n8IJcUZJZcY9AJMefL72XJPwCwvuE3nYarJn2DLDs5hfR7nWZio9v8oSoZTP2s6z8FEifuHUVIyz5r4MzDVmhPlmcj3gBReQQTuuXU/DVOuOfkSaNqHPqg5GvH6qcA8I+8nYcolJ0oYSiR0Ln4X+K8IT7nn05+cNPCnYIrJkHMuh541wPqlZwKuTtexmvIyOsV5Ss+fgClmEeegSsGWCCWrs98HrVRYNrdAgqdT9ugETInXQsKp1FygTlZnBAn4eisTSHc4YQpKKPHAJAEvI5mxuJv/8UmcwH23LFjjtrvK8thfOoIpp7xO8Cx953axGp8QZvDYsX8xvx6G6ZG492FaNq/xgauuLibBkcCDYdLhMmvOHQOAmd0X9x5MMcs5UYK8OrhSLXqZBuqUH8gCfuB2ZEAe98SoBxMHvGMpD/jwUpQMu9fCN+9g6XDt8mdMYNAbvAdT93kfWHCDHqfLtrvHCccHCyeSpWmGvCgFwdcvwYyfeBlzmk2G080hq1NnH75/HndRWpnmRCmeDHlhgugwfj+AiXiXHLgTUba/u8mhp2BVYaseladD5tqEiv+CBqjgTkIpwYGz1IVplbzCaNZsHmM3Ksghr6O1DwFQ3rLuL+X5UHmayANxQE7r15O3KLvL0YVZ8Q9SNs9KXqOeoFAPMM/z8EAJoDpSxlTqxYFFNH5pd7uDdGBa/EsC3LQRRVz4fi+EUauqOphilJr+eGNRlPLmmkC1dRiOYIrxFbEPcLSM3Vmd51FwKcYWpZFjrhvc+OWc6T99C3OzH3cPE42uinaVqc24zYqnUXg+nypWmmIWpMEbXBlcwWKvPPcwrzC67SgmlXPKcVU4myZnYgMx1pTZK6Zfo8J+bcIMuHt18Q4T8bswu2H8deNyoZcZXfhTKK1kZQwTNunq5IbtD0VDRzA9XvvTISOPGwZNVs4X+5hB1UmkuI0iQrwR4CH5Xh+myqsqYHcHELoTttyynTvRUdIC6UPjrTGZqDhgS+4NOrhWezA93lCyKJfKHiiIiibZWy0V51DiRaz5jsZ0n5gtuq47NLURrxtmeocwVU4xh7lkkXLRmRwzaLYjSDEzFtle4qlgG47GFJF1kNYD/jSRsM4pB0qhHsCs+CYTmBMmGSTJ999X8nZh06GRl+88ny3MYeNCyXbHtgEzr4nMH3KAVdWFKaZ8EZWRUh3EZohMpsYOKBwmuMVjDLfOnWWvlKcat8LzjhI4eUnoI9EBqpxPFJxC7MDELtdVICcUpdgC1Z92YQVwXxk6K3szhmtmOuTJm+GnbL3Qy7uvDJxIb0Cy68X5jAsmdHEHps01mY0TKIpboCJ+yXcia4wb95IEEK5qlWJT2rS/tNipOaDkKRO23eVyzacAnckepsqX5DFpKCm+ExOT9703+NQYIlSb0AyCocF8jYElrbYsCBUqOHuQ7GoUci2gMULvMKUxjwCBJe7cpwEqV3reLj3wa7Y8ajlUIHSmzMzJmy8tEsqTeiUPehfHXFoJtCkLBtOacOlbMDq+F+PRrdQ7GsNmbaaG0eQD5KRleCrdqWT1LqSXWiWXcoGlvIWJCj6xA3ktHQOlMzpseEbJWWwkSlrj2eBt7tEwm6KJPsiBmhV8MJtVZzClkOcCOuNACWsi9oGKahxEjEdhzhhUxGxcXDArDpTHIFbFY5Bi9sKpktpVZzDnHGsOvj24FApwzFNLL2YBW2HghK3eFLM3p6mUWcb9p2oWQFr7BqAfc2wzguGkhanyBBfOD5SlOasuM6I0OwaqUqDKTjNZmzeFeRhadmq55bh4ogyhuNo84fBBjZHawMTTj6ff+CqzMGfkUrkG5iplPDo4vDvylo4CYG6rqv0GBeisbdQHySSrKlw6k4aztLEoBx8rbJDjBmYVffxVgWyNZBmy1XWiY5Zj0zSiCt/49s0BitAU8RyxJNoE3w26InkaN04F5tCeUcZgWpOP7RactiJOoZBSm7Gld9NNHwdFEa9nhuE4M83D1jFIHI9cE1A1WmSoeUjqonyc7mbpeGEgpxysCcZ6tgVq4TL0IbN+RSz3V15EdjCdBjY+0gd05uaaCwF0XF1CYjvWANkfwzRSmcLEXH47cPzAY5qGDa7aS5Pxl6/Fffajj6E21Zr935Jk7ED3zR+XW5XGBD4Zczh0UMMUpsTpSgPqdtt40E4DyqjhpiplGBwvfR8jAyklUwNCw19v55k9a5y6XCWLIJcoTI87ogSKM02w1U6pnOlUkQLF1zz1WDceoJal4s2kSjIvmto49isL2+HQ4Aw1FG8gWOU1pVpwlieSumVSKQlNCJSZtsHHNvt9IlFW+A5diqlebS8UVepazfgrSIzSErgkqAvUyPVsOykySUKqKxV3y7YnZhJtUuqaQH//dAMUp+FVO/VUhgT1+jSCYhZxI6vN4rEaRGpwJuhYuEVsL6lBhOZy3vrtTJTmgcm72luCoSpg3mC0C9RwG53TqiAv8BUBMuk48Hspoh+hQefaDGy0BalWVJSurheidkggN9UgAOjS+WuXnin17w6E7sJ+X3qmJpOQecjfw1gVt3qMMoByfY6GWmcixDckZVqgzlMTgjVIpZQpHH9V4zbHa1XFE0UOp/oux2DhJIpurHDxY8HmTtsfI6Ww9kZUp5MHomkpEYwrnQk3DHfxLpVt3Z3dXODi2wKPL3UeKA0gmlRHa+3zSIFmHmqa60Bjpu1ANuJ+pdgckJkIL/fV6dHoe+mhLRxsB5CuPSVFeI63eRVqEsPZPSCZRhJe7601omI/mm/F3qJiP/Rnj8N0p7HUrA6vqeI/STAQ1vcXyFDvUpuQrTCpJNt4ktoKDrKLnC+hcvkGa2F99yCM4HCosxzWe+qw9fhW0X2rvSWwEBafMEwz1MxN9+Fx67nxFmN8OPZY+HLuI/MKUhSDqnIjf9llOC2pHhvUB1borxXIS+d0P4N5+onhdOLZ3DRP9HSZm4oZFcQSRarKVz5Q4HQ5uo4ezkz/OZjAnVjXkCyruCqpu2SGZRxPAhM6j19/SBhdR9IZP+gcTDO94WCPiH88GFBxTZO6Rc8/bzgZdq44YiwsTv0ehuS8P37BURfR8wzQSH72rTqKh7hGOF0RQnnzlN4ET/YN92iAqolPI9y/yW3XiwO1OIEThCdhmnU/yL7iPqnJ6vFuvFwc4BNlUHB9yliygpBbbyMOSFCot18uDqrjDTlqLI9dD8CyIbffxpJu4ev99YPyyCoo6QlHzq/vQNk47ndczZ6z7kOijpzd994N7Y4l/wwa4GUv2KVucT/IgG71kXa7pPj2N7uDpF79aBQfhWzOXKY25UbaK4jB7YPQYeYHYsRCNtzPgetJrd9KyU56BrJ98yCUiryLiAXAR+kEaFBSmv/oP+2/+z/O/8Auc7Q2Vh9Y5ZD98lY6hAQ1tZecoZ7XPQQdjdmfgVzOwL1D7ZedJWcOUl1grN1F08gZEbbX5vp+/nAXTfdaiaW6uolD6BJZvYuy8SxMJoUSJQTdNxJK3lUQSxx20rAA8h3Tu6hLQofSyr57oIG8c0LaNOw+qQ2XlXQXMY+D0HjXtFlBDbpvMGmnldqkdkeGwHA4XK2GK5f+f3hNLMRoaEYJYlWF63zD6vaw5g/vot2hSeNF7m24gPvIbXFKTMuzmug7aQtq1my48GxfcRJcJVYTqjN37tMOZ7bbV1ybgZwEZnVz7lzE2qfkERjBabsZKHOfk/mYABzZWZXZn3jucbe1yrVRzUsAuq4Lzc8bEcDtRjXntj/3uODjTh/XDBfutv15iyj+KwSLXRGFNf//DHNubWEOyOfJ+mcTGL8X+PCWS23JeXxsDQIwoohFgfDx8bGtMgCz798NlummX2mfXKGfsb/NHvfEV3fWklHsy6U4i89aJMI/P3/+aHQ3fI7jeQigtoljHTaflfRvhgD1OPaa7Boc/fXz5xSCb/N4T/P88i261C0+4y3la2C6dBVwY7iMv1iJIzBe5W1dC2CFd14k+JtdRahTUl3/1QBa95jJFfYEHJTy8RZG7mCSA5gBq9jOIvYZaWAaNjvf0cCk1tP6ajSpMxrENTlGi/CVxzFy0m5h5KDitm3nYA6oG7uD6XRgijuYA2mXlA2+cc+JeVBmyl20exYmdS8Dg0aqF2Bm/2JBHY3H+NVKv2h3EHOeAN3C/NfMcWaPe5iMcTJqJC/BjP/FHHvHv3zK9eBe5i6ceC8oX3JOZytCTTT9qxJ3MGVCeXDyaB7z5h4mqZOWuG0zjXx7MOnonJUpFGZn92cHs6Y40MK/APP9Iv6TNMfl+QP08dHoSzCDEf1x8z9bmN5lmJwe86nDDuJRdeppR6dZdFSyXZY5eedNufhfqivlf1+AOcDJnFI5L88sev9+wN0Hup2DOOkhdwLh26nhWhH67lOKNh2YzpohwT0RMkrKsw/KVoTYRf7szHkc8O3boQpQCnQCpnhwEgcYbuydqm/ZKiT2VTZp7zAVt5abXWAGs2S5fmYxmK2zqLFsFNL3S9wPzCw+sIXA7Ryt7h4S606n9pJZ6uaE8e3oTbM7mwpwm+2PZtF1eWBtIhOab4xDBNhVSJSO4UIAfFvM8g4C5aWzr9Q9cifty+qcEbYmL+qJY+VnYVL1gbYw4QKxUwXBl1dWbUwtXKuQ9K1C0o/K98CDMXuMPDGbvssxzLtHkA4OME52aRsYSrJaR//Bo6NlPw9TmDWNDyhMwWd+DTXibD7Uv41mO4z+3JKo9iu0wPM/Mca/VpOOuTfOHmDcsn2TTBI9zctrfFzy1cJsnkfxGoWkvKIWJniLLVFkMIE/R1YTCVv4F3UXoNbd3TiGqWPiSaLn/5C9bbB34Tgo5fKn7WzqOHZXIcEaNPzDMYGQeF6y9Tc9r5zSFZ14dutdfp17XhNYAbewM4lI2fwrq44CU3rRO817G710VvB45mbySEi2YRl4OjhQ2j+qvN3rAGaKqzlRE1MZxXqPk6C564FG/9Z8X9mVk7FfbO9jmCwUNo12dlg7TkZMgHplXQBCl1TfXRio80fYKk9g1oNLMPHWUwLmSMKkXmkxFnkLPPsEuEJh6tgnwwqNTTNQk53Xq3xw8FustsczAJwuw4WNkY1iE3D3ObmaoDKVVE23svUX8r5bAfJ+N4p+UwJxs/PogPNLtsTJq6w7cFn8ntZnwA00f41xXlINQLxfrRgwFTq4DHNg6e9jaJ5eIiznZojJ72mUY4xkFL+8yJU7KvVx5bWLbqZHBQOXGmZAZxYlMolcT03oc95SLHiOYGuJ4AMeyDJWLY+KFgzbuThizJMwB2SxxWn8+vk1kCdPSWON3GL5eSiDct08tPOMqiRDVhNstkoBLk60QTvZzOVpmwp4/vn3khRLTKjrpSzIxgWf1FIOFnH91uhX8Jdav42SdP/RkLOZy0CctGIEAA0BtXHFsvNgZas6dM9V4FyPk2yajiXwgaCRs++qBIa8rXGYcd/hZAdRkoTOIWVr6cv3VNUdxby7Ms8Ajm7JZDQDzMkhz52DmFc0GmJtmzqBJjuySy25ismLhEN3VEzv0U4AKM/egzOSbYJ0k7WN7njfYFhf0bbpuAkWDRZKLUZWEhIZ4eTm+QRCKDg1KmcP6r//Y8kbZuD2puraJlhH7dl8WxrPxoR8kVC9jtVAgQBem7EHdFWUJS5mbxLJc4zwzxg9d5NCwDx3HP98gza1u+7UxdEEUMr1i1UOhws0f5wmc/2Kykw6Y3D69Rv9Q83CBA/0FcHPhvB3N9y61EjuQru7g7ZiVJrymLxN5IXramiyoI4JamNRwLEdQJ0lpSDkWREi2yJkg8lYIpTn4QHKs3N5uXngfHg4XZrm63IaRXOriFGRp80et5I/CM65aJkhpHEfTKv4rbasOfXjFxZZRLVYl0nve8PJhSaHF1sxToYHnhGgbpOEbM+S1jj2Fd+moqSMiIqfFepOCmDWBGOAVRcAwE7nfaewgslCceaDQZrKWKJDDAleGdNKd49QXqr8u9zYMlv0zI5CHVAUT5dqGUGFncEyJZxm6kjDiRP+U9NgDExHo5EGvj1/pS7aL8eIB5Xj6AjhWrURZUcjYU3q+q6xEt7e2HLQnJE+GM+YS5o7M0JSado8YDBjdfJqBy9qPStUibotTiJjjBINzx9d1Zu5EpaTSMMZluQa/zUThMVkSa8TDlEG5HJF0EdNV7F+2J1B05uMdIIJsf6hPOkuKhUXUYlGM13dbDTolKim0hLiTTTGVfSAywwvcon8xxoUEmFVk0c+NvD1+5quUrK8gwog2EQ9YKiVf/2i0v/Ni1evBIce1ug0bgoAKMzkhUoyQYTIZPiiZtmgetugFyKOnv8RTkiaknsfFqRyNASuTnVhgYZCAQPBk+3XCmkZmdKYN3BZOsbCGOs5wRPqoY0nMqkyeVLjokhOtrKnURdHy2qu9srJqaMprXMSbpCq2lGsFisKKmdVYaimIpRL0lNUy68xHgnj2A6L/HQ3DyWqP6e9MqMsOOcWQScPp4qhEVlW501y6wdaOhDkFYFGgWqvzItRZIDTWxBwGGQf350b5gCVZ5ssN9XqijvSR8034K+46cSmMz7UctMfk3MdjIAxnnxq629Wb//iXnLdmVLffuy2PyutHQXC8nTaFShm0wXgU2GybidpzuUU9ZO+pxueKm4a81ecX9PkH8XaJ7UIBoq/jK95G8F1r0xA3nr4Wa9MuOrGV7+AIi7ufAEFdMwiPu+yfQ5M9l6UNPdvTC2wU/55Kv3+13kwErHdvBzl6mOdEI4L+7oXZNwBk5JKJmkIjSvqeOiXw2JCbnx9z80v7rGQNC+mzowDKo3uZv60mEvo5rch3fUaJBlX81Rjr0FSzmzJsdcgKbmWzit887uF7oY5aF4qJcXspVJD3/dNGhdvCSom/YXbvFSKesb/1ZdK7bGqmMRemRbBevGF0mIdFBRfTLD6Oa/o+j9IXQTn5BcxOQAAAABJRU5ErkJggg==" alt="Logo HNUE WarmLink" class="app-logo-img" />
+          </div>
+          <div>
+            <div class="app-title">HNUE <span>WarmLink</span></div>
+            <div class="app-slogan">Thắp lửa tử tế, sưởi ấm cộng đồng</div>
+          </div>
+        </a>
+
+        <div class="header-actions">
+          <button type="button" class="gps-status-btn" id="headerGpsBtn" title="Bật định vị GPS">
+            <span class="gps-dot"></span>
+            <span id="headerGpsLabel">GPS: Sẵn sàng</span>
+          </button>
+
+          <a href="#/chung-nhan" class="header-points-pill" title="Xem Thẻ Điểm Ấm">
+            <span>🔥</span>
+            <span id="headerPointsBadge">175đ</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Thanh thông tin tài khoản -->
+      <div class="student-auth-strip">
+        <div class="auth-user-info">
+          <span class="verified-badge" id="headerVerifiedBadge">✓ @hnue.edu.vn</span>
+          <span class="auth-user-text">
+            <strong id="headerStudentName">Nguyễn Minh Anh</strong> (<span id="headerStudentFaculty">Khoa CNTT</span>)
+          </span>
+        </div>
+        <button type="button" class="btn-switch-user" id="openProfileModalBtn">Đổi thông tin</button>
+      </div>
+    </header>
+
+    <!-- MAIN PAGES -->
+    <main class="app-pages-container">
+
+      <!-- TRANG 1: PHÁT TÍN HIỆU KHẨN CẤP -->
+      <section class="app-page active" id="page-phat-tin-hieu" data-route="/phat-tin-hieu">
+        <div class="page-header-card">
+          <div>
+            <h1 class="page-title">Phát Tín Hiệu Cần Hơi Ấm</h1>
+            <p class="page-subtitle">Kết nối tức thời với cộng đồng ĐHSP Hà Nội quanh bạn</p>
+          </div>
+        </div>
+
+        <!-- Thẻ định vị GPS & Chế độ Người Thắp Lửa -->
+        <div class="gps-live-card">
+          <div class="gps-card-top">
+            <div class="gps-info-col">
+              <div class="gps-coords-text" id="gpsCoordsDisplay1">Tọa độ HNUE: 21.03890° N | 105.78190° E</div>
+              <div class="gps-place-name" id="gpsDetectedPlace1">📍 Khu vực: Ký túc xá ĐHSP Hà Nội (Nhà B2)</div>
+            </div>
+            <button type="button" class="gps-btn-action" id="enableRealGpsBtn1">
+              <span>📡</span> <span id="enableRealGpsText1">Bật GPS thật</span>
+            </button>
+          </div>
+
+          <div class="volunteer-toggle-row">
+            <div>
+              <strong class="volunteer-toggle-title">Chế độ “Người Thắp Lửa”</strong>
+              <div class="volunteer-toggle-desc">Chia sẻ vị trí GPS của bạn để sẵn sàng hỗ trợ người xung quanh</div>
+            </div>
+            <button type="button" class="switch-pill" id="volunteerBeaconSwitch" aria-label="Bật chế độ Người Thắp Lửa"></button>
+          </div>
+        </div>
+
+        <!-- Nút bấm khẩn cấp tỏa sóng -->
+        <div class="sos-stage">
+          <p class="sos-lead">Chạm nút bên dưới để phát tín hiệu và quét hỗ trợ trong <strong>bán kính 500m</strong></p>
+
+          <div class="sos-ripple-box">
+            <div class="ripple-wave"></div>
+            <div class="ripple-wave ripple-wave--2"></div>
+            <div class="ripple-wave ripple-wave--3"></div>
+
+            <button type="button" class="btn-emergency-sos" id="triggerSosBtn">
+              <svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 2C9.5 6 7 8.5 7 12.5C7 15.5 9.2 18 12 18C14.8 18 17 15.5 17 12.5C17 10.2 15.9 8.3 14.5 6.8C14.3 8.4 13.4 9.5 12.2 9.8C12.8 7.5 12.7 4.7 12 2Z"/>
+              </svg>
+              <span class="btn-emergency-text">Phát tín hiệu<br/>cần hơi ấm</span>
+            </button>
+          </div>
+
+          <div class="sos-hint-text">
+            ⚡ Tự động khớp vị trí GPS &amp; chuyển sang Radar 500m
+          </div>
+        </div>
+
+        <!-- Cấu hình yêu cầu & Trợ lý AI NLP -->
+        <div class="ui-card">
+          <div class="field-block">
+            <label class="field-label" for="hnueAreaSelect">
+              <span>1. Vị trí của bạn</span>
+              <span class="field-tag-sky" id="areaAutoTag">Khuôn viên HNUE</span>
+            </label>
+            <select id="hnueAreaSelect" class="mobile-select">
+              <option value="Ký túc xá ĐHSP Hà Nội (Nhà B2)">Ký túc xá ĐHSP Hà Nội (Nhà B2)</option>
+              <option value="Giảng đường Nhà K">Giảng đường Nhà K</option>
+              <option value="Thư viện Trường ĐHSP Hà Nội">Thư viện Trường ĐHSP Hà Nội</option>
+              <option value="Giảng đường Nhà C & Nhà D3">Giảng đường Nhà C &amp; Nhà D3</option>
+              <option value="Khoa Giáo dục Đặc biệt">Khoa Giáo dục Đặc biệt</option>
+              <option value="Vị trí GPS thực tế hiện tại của bạn">📍 Vị trí GPS thực tế hiện tại của bạn</option>
+            </select>
+          </div>
+
+          <div class="field-block">
+            <span class="field-label">2. Nhóm hỗ trợ</span>
+            <div class="support-group-grid" id="supportGroupPills">
+              <button type="button" class="support-chip active" data-group="Y tế & Đời sống">🩺 Y tế &amp; Đời sống</button>
+              <button type="button" class="support-chip" data-group="Đồng hành di chuyển">🤝 Đồng hành di chuyển</button>
+              <button type="button" class="support-chip" data-group="Học tập & Tài liệu">📚 Học tập &amp; Tài liệu</button>
+              <button type="button" class="support-chip" data-group="Hỗ trợ khẩn cấp khác">⚡ Hỗ trợ khẩn cấp</button>
+            </div>
+          </div>
+
+          <div class="field-block">
+            <label class="field-label" for="sosMessageInput">
+              <span>3. Nội dung cần hỗ trợ</span>
+              <span class="field-tag-emerald">Kiểm duyệt AI NLP</span>
+            </label>
+
+            <div class="quick-templates-row">
+              <button type="button" class="template-pill" data-tpl="Mình đang sốt nhẹ ở KTX B2, nhờ bạn mua giúp vỉ thuốc hạ sốt và hộp cháo.">+ Sốt tại KTX</button>
+              <button type="button" class="template-pill" data-tpl="Mình cần bạn đồng hành hỗ trợ di chuyển lên tầng 3 Giảng đường Nhà K.">+ Hỗ trợ di chuyển</button>
+              <button type="button" class="template-pill" data-tpl="Mình cần mượn gấp giáo trình/sạc laptop tại Thư viện trước giờ kiểm tra.">+ Mượn đồ học tập</button>
+            </div>
+
+            <textarea
+              id="sosMessageInput"
+              class="mobile-textarea"
+              rows="2"
+              placeholder="Nhập ngắn gọn điều bạn đang cần giúp đỡ..."
+            >Mình đang sốt nhẹ ở KTX B2, nhờ bạn mua giúp vỉ thuốc hạ sốt và hộp cháo.</textarea>
+
+            <div class="nlp-status-box" id="nlpFeedbackBox">
+              <span id="nlpFeedbackText">✓ AI NLP: Nội dung rõ ràng, tích cực &amp; an toàn</span>
+              <button type="button" class="btn-nlp-fix" id="nlpAutoCleanBtn" style="display: none;">Chuẩn hóa</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TRANG 2: RADAR & BẢN ĐỒ GPS XUNG QUANH -->
+      <section class="app-page" id="page-radar-500m" data-route="/radar-500m">
+        <div class="page-header-card">
+          <div>
+            <h1 class="page-title">Radar &amp; Bản Đồ Xung Quanh</h1>
+            <p class="page-subtitle">Tìm người hỗ trợ gần nhất trong bán kính 500m</p>
+          </div>
+          <button type="button" class="gps-btn-action" id="enableRealGpsBtn2">
+            <span>📡</span> <span id="enableRealGpsText2">Bật GPS</span>
+          </button>
+        </div>
+
+        <!-- Tọa độ GPS đang quét -->
+        <div class="radar-gps-strip">
+          <div class="gps-info-col">
+            <div class="radar-gps-title" id="radarGpsTitle">📡 Tâm định vị: Khu vực ĐHSP Hà Nội</div>
+            <div class="radar-gps-exact" id="radarGpsExact">Lat: 21.03890° N | Lng: 105.78190° E (±12m)</div>
+          </div>
+          <button type="button" id="refreshRadarBtn" class="btn-refresh-gps">
+            ↻ Làm mới
+          </button>
+        </div>
+
+        <!-- Chuyển đổi chế độ Radar 500m / Bản đồ Tọa độ GPS -->
+        <div class="view-mode-tabs">
+          <button type="button" class="view-mode-btn active" id="modeRadarBtn">🎯 Radar Đồng Tâm 500m</button>
+          <button type="button" class="view-mode-btn" id="modeGpsMapBtn">🗺️ Bản Đồ Tọa Độ GPS</button>
+        </div>
+
+        <!-- CHẾ ĐỘ A: RADAR ĐỒNG TÂM 500M -->
+        <div class="radar-panel" id="radarViewPanel">
+          <div class="radar-header-bar">
+            <span class="radar-live-pill" id="radarScannerStatus">● ĐANG QUÉT 500M</span>
+            <span>Tìm thấy: <strong id="nearbyCountBadge">4 người xung quanh</strong></span>
+          </div>
+
+          <div class="radar-circle-stage" id="radarCircleStage">
+            <div class="concentric-ring concentric-ring--500"></div>
+            <div class="concentric-ring concentric-ring--300"></div>
+            <div class="concentric-ring concentric-ring--100"></div>
+
+            <span class="ring-tag ring-tag--500">500m</span>
+            <span class="ring-tag ring-tag--300">300m</span>
+            <span class="ring-tag ring-tag--100">100m</span>
+
+            <span class="compass-dir compass-dir--n">Bắc</span>
+            <span class="compass-dir compass-dir--s">Nam</span>
+            <span class="compass-dir compass-dir--e">Đông</span>
+            <span class="compass-dir compass-dir--w">Tây</span>
+
+            <div class="radar-axis-x"></div>
+            <div class="radar-axis-y"></div>
+            <div class="radar-beam"></div>
+
+            <div class="radar-user-dot" title="Vị trí của bạn"></div>
+            <div id="dynamicRadarBlipsLayer"></div>
+          </div>
+
+          <div class="radar-caption-hint">
+            Chạm vào từng chấm trên Radar để xem vị trí &amp; liên hệ trực tiếp
+          </div>
+        </div>
+
+        <!-- CHẾ ĐỘ B: BẢN ĐỒ TỌA ĐỘ GPS XUNG QUANH -->
+        <div class="live-gps-map-stage" id="gpsMapViewPanel">
+          <div class="gps-canvas-box">
+            <div class="gps-grid-bg"></div>
+            <div class="gps-radius-circle"></div>
+
+            <span class="map-corner-label">KHUÔN VIÊN ĐHSP HÀ NỘI • BÁN KÍNH 500M</span>
+
+            <div class="radar-user-dot" title="Vị trí của bạn"></div>
+            <span class="map-user-tag">Bạn (Tâm GPS)</span>
+
+            <div id="dynamicMapPinsLayer"></div>
+          </div>
+        </div>
+
+        <!-- Bộ lọc bán kính -->
+        <div class="radius-filter-bar">
+          <strong class="filter-bar-title">Người xung quanh gần nhất:</strong>
+          <div class="filter-pills-group" id="radiusFilterPills">
+            <button type="button" class="radius-pill active" data-max-dist="500">500m</button>
+            <button type="button" class="radius-pill" data-max-dist="300">&lt;300m</button>
+            <button type="button" class="radius-pill" data-max-dist="120">&lt;120m</button>
+          </div>
+        </div>
+
+        <!-- Danh sách tình nguyện viên xung quanh -->
+        <div class="vol-cards-stack" id="nearbyVolunteersList"></div>
+      </section>
+
+      <!-- TRANG 3: THẺ ĐIỂM ẤM & CHỨNG NHẬN -->
+      <section class="app-page" id="page-chung-nhan" data-route="/chung-nhan">
+        <div class="page-header-card">
+          <div>
+            <h1 class="page-title">Thẻ Điểm Ấm &amp; Chứng Nhận</h1>
+            <p class="page-subtitle">Ghi nhận đóng góp cộng đồng &amp; minh chứng Sinh viên 5 tốt</p>
+          </div>
+        </div>
+
+        <!-- Thẻ tích điểm cá nhân -->
+        <div class="points-wallet-card">
+          <div class="wallet-top">
+            <div>
+              <div class="wallet-kicker">Thẻ Thắp Lửa Cá Nhân</div>
+              <div class="wallet-student-name" id="walletStudentName">Nguyễn Minh Anh</div>
+              <div class="wallet-student-meta" id="walletStudentMeta">minhanh.k72@hnue.edu.vn • Khoa CNTT</div>
+            </div>
+            <span class="wallet-id-tag">#HNUE-7204</span>
+          </div>
+
+          <div class="wallet-score-row">
+            <div>
+              <span class="wallet-score-num" id="walletScoreNumber">175</span>
+              <span class="wallet-score-unit">Điểm Ấm</span>
+            </div>
+            <span class="wallet-goal-text">Mốc SV5T: 200 điểm</span>
+          </div>
+
+          <div class="sv5t-progress-bar">
+            <div class="sv5t-progress-fill" id="sv5tProgressBar" style="width: 87.5%;"></div>
+          </div>
+          <div class="sv5t-status-caption" id="sv5tProgressNote">
+            Còn 25 Điểm Ấm để đạt chuẩn tiêu chí “Đạo đức tốt” cấp Trường
+          </div>
+        </div>
+
+        <!-- Chứng nhận điện tử -->
+        <div class="certificate-box">
+          <div class="cert-top-strip">
+            <span class="cert-issuer">Hội Sinh Viên ĐHSP Hà Nội</span>
+            <span class="cert-valid-tag">✓ Xác thực số</span>
+          </div>
+
+          <div class="cert-label-sm">CHỨNG NHẬN ĐIỆN TỬ</div>
+          <div class="cert-main-title">“NGƯỜI THẮP LỬA TIÊU BIỂU”</div>
+          <div class="cert-holder">Sinh viên: <span id="certHolderName">Nguyễn Minh Anh</span></div>
+          <p class="cert-summary">
+            Ghi nhận tinh thần xung kích, lan tỏa lối sống đẹp và hỗ trợ kịp thời bạn đồng môn tại Trường ĐHSP Hà Nội.
+          </p>
+
+          <div class="cert-hash-row">
+            <span>Mã xác thực: <strong>#WL-HNUE-2026-8892</strong></span>
+            <span id="certTotalHelps">7 lượt hỗ trợ</span>
+          </div>
+
+          <button type="button" class="btn-view-full-cert" id="openFullCertBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" aria-hidden="true">
+              <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+            </svg>
+            Xem bản đầy đủ &amp; Lưu PDF
+          </button>
+        </div>
+
+        <!-- Lịch sử xác thực -->
+        <div class="ui-card">
+          <strong class="card-section-title">Lịch sử hỗ trợ đã xác thực</strong>
+          <div id="verifiedHistoryList"></div>
+        </div>
+      </section>
+
+      <!-- TRANG 4: BẢN ĐỒ NHIỆT TỬ TẾ -->
+      <section class="app-page" id="page-ban-do-nhiet" data-route="/ban-do-nhiet">
+        <div class="page-header-card">
+          <div>
+            <h1 class="page-title">Bản Đồ Nhiệt Tử Tế</h1>
+            <p class="page-subtitle">Mật độ các hoạt động sẻ chia trong khuôn viên trường</p>
+          </div>
+        </div>
+
+        <div class="campus-map-box">
+          <svg class="campus-grid-svg" viewBox="0 0 360 205" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Bản đồ nhiệt khuôn viên ĐHSP Hà Nội">
+            <rect width="360" height="205" fill="#1e293b"/>
+            <path d="M20 102 H340 M180 15 V190" stroke="#334155" stroke-width="2" stroke-dasharray="4 4"/>
+            <rect x="24" y="22" width="102" height="48" rx="8" fill="#0f172a" stroke="#475569"/>
+            <text x="75" y="44" fill="#cbd5e1" font-size="10" font-weight="700" text-anchor="middle">KTX B1 - B2</text>
+            <text x="75" y="58" fill="#fb923c" font-size="9" font-weight="700" text-anchor="middle" id="ktxSparkCounter">128 đốm lửa</text>
+
+            <rect x="224" y="22" width="110" height="48" rx="8" fill="#0f172a" stroke="#475569"/>
+            <text x="279" y="44" fill="#cbd5e1" font-size="10" font-weight="700" text-anchor="middle">Giảng đường K</text>
+            <text x="279" y="58" fill="#fb923c" font-size="9" font-weight="700" text-anchor="middle">86 đốm lửa</text>
+
+            <rect x="24" y="130" width="102" height="48" rx="8" fill="#0f172a" stroke="#475569"/>
+            <text x="75" y="152" fill="#cbd5e1" font-size="10" font-weight="700" text-anchor="middle">Thư viện HNUE</text>
+            <text x="75" y="166" fill="#facc15" font-size="9" font-weight="700" text-anchor="middle">54 đốm lửa</text>
+
+            <rect x="224" y="130" width="110" height="48" rx="8" fill="#0f172a" stroke="#475569"/>
+            <text x="279" y="152" fill="#cbd5e1" font-size="10" font-weight="700" text-anchor="middle">Khoa GD Đặc biệt</text>
+            <text x="279" y="166" fill="#fb923c" font-size="9" font-weight="700" text-anchor="middle">74 đốm lửa</text>
+
+            <circle class="heat-spot" cx="75" cy="46" r="24" fill="rgba(249,115,22,0.34)"/>
+            <circle cx="75" cy="46" r="5" fill="#f97316"/>
+            <circle class="heat-spot" cx="279" cy="46" r="18" fill="rgba(249,115,22,0.28)"/>
+            <circle cx="279" cy="46" r="5" fill="#fb923c"/>
+            <circle class="heat-spot" cx="75" cy="154" r="15" fill="rgba(250,204,21,0.25)"/>
+            <circle cx="75" cy="154" r="4" fill="#facc15"/>
+            <circle class="heat-spot" cx="279" cy="154" r="22" fill="rgba(249,115,22,0.36)"/>
+            <circle cx="279" cy="154" r="5" fill="#f97316"/>
+          </svg>
+          <div class="campus-map-footer">
+            <span>🔥 Tổng đốm lửa toàn trường: <strong class="text-orange-light" id="weeklySparksCount">342</strong></span>
+            <span>● Cập nhật trực tiếp</span>
+          </div>
+        </div>
+
+        <div class="ui-card">
+          <strong class="card-section-title">Bảng xếp hạng Liên chi hội</strong>
+          <div class="faculty-rank-item">
+            <span>🥇 <strong>Khoa Công nghệ Thông tin</strong></span>
+            <span class="rank-score-text" id="cnttScoreRank">1.420 Điểm Ấm</span>
+          </div>
+          <div class="faculty-rank-item">
+            <span>🥈 <strong>Khoa Giáo dục Đặc biệt</strong></span>
+            <span class="rank-score-text">1.295 Điểm Ấm</span>
+          </div>
+          <div class="faculty-rank-item">
+            <span>🥉 <strong>Khoa Ngữ văn</strong></span>
+            <span class="rank-score-text">1.110 Điểm Ấm</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- TRANG 5: MÃ QR & CHIA SẺ -->
+      <section class="app-page" id="page-ma-qr" data-route="/ma-qr">
+        <div class="page-header-card">
+          <div>
+            <h1 class="page-title">Chia Sẻ &amp; Mã QR</h1>
+            <p class="page-subtitle">Quét mã để mở nhanh ứng dụng trên điện thoại</p>
+          </div>
+        </div>
+
+        <div class="qr-box-center">
+          <div class="qr-svg-holder" id="mobileQrHolder"></div>
+          <strong class="qr-main-heading">QUÉT MÃ ĐỂ TRUY CẬP NHANH</strong>
+          <span id="qrLinkCaption" class="qr-link-caption"></span>
+        </div>
+
+        <div class="ui-card card-stack-sm">
+          <label class="field-label" for="customMvpLinkInput">Liên kết trang web</label>
+          <input type="url" id="customMvpLinkInput" class="mobile-input" placeholder="https://..." />
+          <button type="button" class="btn-primary-full" id="regenQrBtn">
+            Tải ảnh mã QR (.PNG)
+          </button>
+          <button type="button" class="btn-secondary-full" id="copyCurrentPageLinkBtn">
+            Sao chép liên kết chia sẻ
+          </button>
+        </div>
+
+        <div class="ui-card guide-card-text">
+          <strong class="card-section-title">Hướng dẫn sử dụng nhanh</strong>
+          <div>1. <strong>Bật định vị GPS:</strong> Cho phép trình duyệt truy cập vị trí để hệ thống tìm tình nguyện viên trong bán kính 500m.</div>
+          <div>2. <strong>Phát tín hiệu hoặc Thắp lửa:</strong> Chọn nhóm hỗ trợ và gửi yêu cầu, hoặc bật chế độ <em>“Người Thắp Lửa”</em> để giúp đỡ bạn bè xung quanh.</div>
+          <div>3. <strong>Nhắn tin &amp; Xác nhận QR:</strong> Trao đổi an toàn (tự động ẩn số điện thoại cá nhân) và quét QR khi hoàn tất để tích lũy <strong>Điểm Ấm</strong>.</div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- BOTTOM TAB BAR -->
+    <nav class="bottom-tab-bar" aria-label="Điều hướng chính">
+      <a href="#/phat-tin-hieu" class="tab-nav-link active" data-route="/phat-tin-hieu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 2C9.5 6 7 8.5 7 12.5C7 15.5 9.2 18 12 18C14.8 18 17 15.5 17 12.5C17 10.2 15.9 8.3 14.5 6.8C14.3 8.4 13.4 9.5 12.2 9.8C12.8 7.5 12.7 4.7 12 2Z"/>
+        </svg>
+        <span>Phát tín hiệu</span>
+      </a>
+
+      <a href="#/radar-500m" class="tab-nav-link" data-route="/radar-500m">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+          <circle cx="12" cy="12" r="9"/>
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>
+        </svg>
+        <span>Radar GPS</span>
+      </a>
+
+      <a href="#/chung-nhan" class="tab-nav-link" data-route="/chung-nhan">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+          <path d="M12 2l3 6 6 1-4.5 4.3 1.1 6.2L12 16.5 6.4 19.5l1.1-6.2L3 9l6-1 3-6z"/>
+        </svg>
+        <span>Chứng nhận</span>
+      </a>
+
+      <a href="#/ban-do-nhiet" class="tab-nav-link" data-route="/ban-do-nhiet">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+          <path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3V6z"/>
+          <path d="M9 3v15M15 6v15"/>
+        </svg>
+        <span>Bản đồ nhiệt</span>
+      </a>
+
+      <a href="#/ma-qr" class="tab-nav-link" data-route="/ma-qr">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+          <rect x="3" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/>
+          <path d="M14 14h3v3h-3zM18 18h3v3h-3z"/>
+        </svg>
+        <span>Mã QR</span>
+      </a>
+    </nav>
+
+  </div>
+
+  <!-- MODAL 1: THÔNG TIN NGƯỜI DÙNG -->
+  <div class="modal-overlay" id="profileModal" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
+    <div class="bottom-sheet-modal">
+      <div class="sheet-handle"></div>
+      <h2 id="profileModalTitle" class="modal-title">Thông Tin Cá Nhân</h2>
+      <p class="modal-desc">
+        Sử dụng email <strong>@hnue.edu.vn</strong> hoặc email cá nhân để đồng bộ Thẻ Điểm Ấm
+      </p>
+
+      <div class="field-block">
+        <label class="field-label" for="inputStudentName">Họ và tên</label>
+        <input type="text" id="inputStudentName" class="mobile-input" value="Nguyễn Minh Anh" />
+      </div>
+
+      <div class="field-block">
+        <label class="field-label" for="inputStudentEmail">Email</label>
+        <input type="email" id="inputStudentEmail" class="mobile-input" value="minhanh.k72@hnue.edu.vn" />
+      </div>
+
+      <div class="field-block">
+        <label class="field-label" for="inputStudentFaculty">Đơn vị / Khoa</label>
+        <select id="inputStudentFaculty" class="mobile-select">
+          <option value="Khoa CNTT">Khoa Công nghệ Thông tin</option>
+          <option value="Khoa GD Đặc biệt">Khoa Giáo dục Đặc biệt</option>
+          <option value="Khoa Ngữ văn">Khoa Ngữ văn</option>
+          <option value="Khoa Toán - Tin">Khoa Toán - Tin</option>
+          <option value="Khoa Tâm lý - Giáo dục">Khoa Tâm lý - Giáo dục</option>
+          <option value="Cộng đồng HNUE">Cộng đồng / Khách mời</option>
+        </select>
+      </div>
+
+      <div class="modal-btn-grid">
+        <button type="button" class="btn-secondary-full" id="closeProfileModalBtn">Đóng</button>
+        <button type="button" class="btn-primary-full" id="saveProfileBtn">Lưu thông tin</button>
+      </div>
+
+      <div class="modal-footer-reset">
+        <button type="button" id="resetAppDemoBtn" class="btn-text-muted">Đặt lại dữ liệu mặc định</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: CHAT AN TOÀN TRONG ỨNG DỤNG -->
+  <div class="modal-overlay" id="safeChatModal" role="dialog" aria-modal="true" aria-labelledby="chatPartnerName">
+    <div class="bottom-sheet-modal">
+      <div class="sheet-handle"></div>
+      <div class="chat-modal-header">
+        <div>
+          <h2 class="modal-title" id="chatPartnerName">Nguyễn Minh Anh</h2>
+          <div class="chat-meta-verified" id="chatPartnerMeta">
+            ✓ Đã xác thực • Bảo mật số điện thoại
+          </div>
+        </div>
+        <button type="button" id="closeChatModalBtn" class="btn-close-modal">✕ Đóng</button>
+      </div>
+
+      <div class="chat-messages-box" id="chatMessagesBox"></div>
+
+      <div class="quick-templates-row chat-quick-row">
+        <button type="button" class="template-pill chat-quick-btn">Mình đang đứng ở sảnh tầng 1 nhé!</button>
+        <button type="button" class="template-pill chat-quick-btn">Cảm ơn bạn rất nhiều ❤️</button>
+        <button type="button" class="template-pill chat-quick-btn">Mình tới nơi rồi, quét QR nhé!</button>
+      </div>
+
+      <div class="chat-input-row">
+        <input type="text" id="chatInputBox" class="mobile-input chat-text-input" placeholder="Nhập tin nhắn..." />
+        <button type="button" id="sendChatBtn" class="btn-send-chat">Gửi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: XEM & IN CHỨNG NHẬN -->
+  <div class="modal-overlay" id="certSheetModal" role="dialog" aria-modal="true" aria-labelledby="certSheetTitle">
+    <div class="bottom-sheet-modal">
+      <div class="sheet-handle no-print"></div>
+
+      <div class="printable-cert">
+        <div class="print-cert-org">HỘI SINH VIÊN VIỆT NAM TRƯỜNG ĐẠI HỌC SƯ PHẠM HÀ NỘI</div>
+        <div class="print-cert-sub">Nền tảng Kết nối Tử tế &amp; Minh chứng Số HNUE WarmLink</div>
+
+        <div class="print-cert-kicker">CHỨNG NHẬN ĐIỆN TỬ</div>
+        <h2 id="certSheetTitle" class="print-cert-heading">NGƯỜI THẮP LỬA TIÊU BIỂU</h2>
+        <p class="print-cert-lead">Trân trọng chứng nhận:</p>
+        <div class="print-cert-name" id="sheetHolderName">NGUYỄN MINH ANH</div>
+        <div class="print-cert-meta" id="sheetHolderMeta">Khoa CNTT • minhanh.k72@hnue.edu.vn</div>
+        <p class="print-cert-body">
+          Đã tích lũy <strong id="sheetPointsValue" class="text-orange-bold">175 Điểm Ấm</strong> qua các hoạt động hỗ trợ cộng đồng tại ĐHSP Hà Nội, đạt minh chứng rèn luyện tiêu chí <strong>“Đạo đức tốt”</strong> – danh hiệu <strong>“Sinh viên 5 tốt”</strong> năm học 2026 – 2027.
+        </p>
+        <div class="print-cert-footer">
+          <span>Mã số: <strong>#WL-HNUE-2026-8892</strong></span>
+          <span>Trạng thái: <strong class="text-emerald-bold">Hợp lệ</strong></span>
+        </div>
+      </div>
+
+      <div class="no-print modal-btn-grid">
+        <button type="button" class="btn-secondary-full" id="closeCertSheetBtn">Đóng lại</button>
+        <button type="button" class="btn-primary-full" onclick="window.print()">In / Lưu PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST THÔNG BÁO -->
+  <div class="toast-msg" id="mobileToast" role="status" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
