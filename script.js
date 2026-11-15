@@ -19,16 +19,30 @@
   const auth = firebase.auth();
   const rtdb = firebase.database();
 
-  // 1. Tọa độ chuẩn các khu vực tại Trường Đại học Sư phạm Hà Nội
+  // 1. Tọa độ 17 địa điểm thực tế tại Trường Đại học Sư phạm Hà Nội
   const HNUE_LANDMARKS = [
-    { key: 'ktx', name: 'Ký túc xá ĐHSP Hà Nội (Nhà B2)', lat: 21.0389, lng: 105.7819 },
-    { key: 'nha_k', name: 'Giảng đường Nhà K', lat: 21.0376, lng: 105.7835 },
-    { key: 'thu_vien', name: 'Thư viện Trường ĐHSP Hà Nội', lat: 21.0369, lng: 105.7828 },
-    { key: 'nha_c_d3', name: 'Giảng đường Nhà C & Nhà D3', lat: 21.0381, lng: 105.7844 },
-    { key: 'gddb', name: 'Khoa Giáo dục Đặc biệt', lat: 21.0364, lng: 105.7841 }
+    // Khu Ký túc xá
+    { key: 'nha_a1_ktx', zone: 'ktx', name: 'Nhà A1 (Khu KTX)', lat: 21.0396, lng: 105.7818 },
+    { key: 'nha_a2_ktx', zone: 'ktx', name: 'Nhà A2 (Khu KTX)', lat: 21.0394, lng: 105.7823 },
+    { key: 'nha_a3_ktx', zone: 'ktx', name: 'Nhà A3 (Khu KTX)', lat: 21.0391, lng: 105.7817 },
+    { key: 'nha_a4_ktx', zone: 'ktx', name: 'Nhà A4 (Khu KTX)', lat: 21.0389, lng: 105.7822 },
+    { key: 'ktx_a12', zone: 'ktx', name: 'Tòa KTX A12', lat: 21.0398, lng: 105.7826 },
+    // Giảng đường & Khu chức năng
+    { key: 'nha_hieu_bo', zone: 'hieu_bo_tv', name: 'Nhà Hiệu bộ', lat: 21.0372, lng: 105.7834 },
+    { key: 'thu_vien', zone: 'hieu_bo_tv', name: 'Thư viện', lat: 21.0375, lng: 105.7827 },
+    { key: 'nha_k1', zone: 'nha_k_v', name: 'Nhà K1', lat: 21.0381, lng: 105.7836 },
+    { key: 'nha_v', zone: 'nha_k_v', name: 'Nhà V', lat: 21.0384, lng: 105.7842 },
+    { key: 'nha_c', zone: 'nha_b_c_d', name: 'Nhà C', lat: 21.0377, lng: 105.7845 },
+    { key: 'nha_b', zone: 'nha_b_c_d', name: 'Nhà B', lat: 21.0374, lng: 105.7840 },
+    { key: 'nha_d1', zone: 'nha_b_c_d', name: 'Nhà D1', lat: 21.0368, lng: 105.7843 },
+    { key: 'nha_d2', zone: 'nha_b_c_d', name: 'Nhà D2', lat: 21.0366, lng: 105.7847 },
+    { key: 'nha_d3', zone: 'nha_b_c_d', name: 'Nhà D3', lat: 21.0364, lng: 105.7851 },
+    { key: 'nha_d4', zone: 'nha_b_c_d', name: 'Nhà D4', lat: 21.0362, lng: 105.7855 },
+    { key: 'toa_123_xuan_thuy', zone: 'xuan_thuy_123', name: 'Tòa 123 Xuân Thủy', lat: 21.0361, lng: 105.7825 },
+    { key: 'san_van_dong', zone: 'svd', name: 'Sân vận động', lat: 21.0386, lng: 105.7852 }
   ];
 
-  // 2. State người dùng hiện tại (100% từ Firebase, không có dữ liệu mẫu)
+  // 2. State người dùng hiện tại (100% đồng bộ từ Firebase)
   let currentUser = null;
   let userProfile = {
     uid: '',
@@ -46,7 +60,7 @@
   const allUsersMap = {};
   let globalStats = {
     totalHelps: 0,
-    areas: { ktx: 0, nha_k: 0, thu_vien: 0, nha_c_d3: 0, gddb: 0 },
+    areas: { ktx: 0, nha_k_v: 0, hieu_bo_tv: 0, nha_b_c_d: 0, xuan_thuy_123: 0, svd: 0 },
     faculties: {}
   };
 
@@ -240,7 +254,7 @@
       syncAllUserUI();
     });
 
-    // 5.2 Toàn bộ danh sách tài khoản (phục vụ Bảng kiểm soát CSDL)
+    // 5.2 Toàn bộ danh sách tài khoản
     rtdb.ref('users').on('value', (snap) => {
       const data = snap.val() || {};
       Object.keys(allUsersMap).forEach((k) => delete allUsersMap[k]);
@@ -315,7 +329,7 @@
         if (key !== lastNotifiedSosKey) {
           lastNotifiedSosKey = key;
           const dist = haversineMeters(gpsState.lat, gpsState.lng, newestIncoming.lat, newestIncoming.lng);
-          notify(`🆘 ${newestIncoming.name} cách bạn ${dist}m vừa phát tín hiệu cần giúp!`);
+          notify(`🆘 ${newestIncoming.name} tại ${newestIncoming.area} (cách ${dist}m) cần hỗ trợ!`);
         }
       }
     });
@@ -325,7 +339,10 @@
       const val = snap.val() || {};
       globalStats = {
         totalHelps: Number(val.totalHelps || 0),
-        areas: Object.assign({ ktx: 0, nha_k: 0, thu_vien: 0, nha_c_d3: 0, gddb: 0 }, val.areas || {}),
+        areas: Object.assign(
+          { ktx: 0, nha_k_v: 0, hieu_bo_tv: 0, nha_b_c_d: 0, xuan_thuy_123: 0, svd: 0 },
+          val.areas || {}
+        ),
         faculties: val.faculties || {}
       };
       renderHeatmapAndLeaderboard();
@@ -336,8 +353,8 @@
   // 6. Định vị GPS thực tế & Công thức Haversine
   const gpsState = {
     isLive: false,
-    lat: 21.0389,
-    lng: 105.7819,
+    lat: 21.0396,
+    lng: 105.7818,
     accuracy: 12,
     watchId: null,
     beaconOn: false
@@ -386,6 +403,24 @@
     };
   }
 
+  // Khi người dùng chọn trực tiếp tòa nhà trong danh sách, cập nhật ngay vị trí hiển thị
+  const hnueAreaSelect = document.getElementById('hnueAreaSelect');
+  hnueAreaSelect.addEventListener('change', () => {
+    const chosenName = hnueAreaSelect.value;
+    const found = HNUE_LANDMARKS.find((lm) => lm.name === chosenName);
+    if (found) {
+      document.getElementById('gpsDetectedPlace1').textContent = `📍 Khu vực đã chọn: ${found.name}`;
+      if (!gpsState.isLive) {
+        gpsState.lat = found.lat;
+        gpsState.lng = found.lng;
+        updateGpsDisplays();
+      }
+    } else if (gpsState.isLive) {
+      const detected = detectNearestHnueLandmark(gpsState.lat, gpsState.lng);
+      document.getElementById('gpsDetectedPlace1').textContent = `📍 ${detected.label}`;
+    }
+  });
+
   function syncMyBeaconToFirebase() {
     if (!currentUser) return;
     const ref = rtdb.ref('beacons/' + currentUser.uid);
@@ -427,14 +462,14 @@
       txt2.textContent = 'GPS Live';
       const detected = detectNearestHnueLandmark(gpsState.lat, gpsState.lng);
       document.getElementById('gpsCoordsDisplay1').textContent = `📡 GPS: ${latStr} | ${lngStr} (${accStr})`;
-      document.getElementById('gpsDetectedPlace1').textContent = `📍 ${detected.label}`;
+      document.getElementById('gpsDetectedPlace1').textContent = `📍 Gần nhất: ${detected.label}`;
       document.getElementById('radarGpsTitle').textContent = `📡 Tâm định vị: ${detected.label}`;
     } else {
       btn1.classList.remove('is-active');
       txt1.textContent = 'Bật GPS thật';
       btn2.classList.remove('is-active');
       txt2.textContent = 'Bật GPS';
-      document.getElementById('gpsCoordsDisplay1').textContent = `Chưa bật GPS • Tọa độ mẫu: ${latStr} | ${lngStr}`;
+      document.getElementById('gpsCoordsDisplay1').textContent = `Chưa bật GPS • Tọa độ điểm: ${latStr} | ${lngStr}`;
     }
 
     document.getElementById('radarGpsExact').textContent = `Lat: ${latStr} | Lng: ${lngStr} (${accStr})`;
@@ -459,7 +494,7 @@
         gpsState.lat = pos.coords.latitude;
         gpsState.lng = pos.coords.longitude;
         gpsState.accuracy = pos.coords.accuracy || 15;
-        document.getElementById('hnueAreaSelect').value = 'Vị trí GPS thực tế hiện tại của bạn';
+        hnueAreaSelect.value = 'Vị trí GPS thực tế hiện tại của bạn';
         updateGpsDisplays();
         if (firstTime) notify('✓ Đã khóa tọa độ GPS thực tế!');
       },
@@ -516,7 +551,7 @@
       statusTag.style.background = '#ffffff';
       statusTag.style.color = '#e11d48';
     }
-    textEl.textContent = `[${myActiveSos.group}] ${myActiveSos.message}`;
+    textEl.textContent = `[${myActiveSos.group} • ${myActiveSos.area}] ${myActiveSos.message}`;
   }
 
   document.getElementById('cancelMySosBtn').addEventListener('click', async () => {
@@ -529,11 +564,11 @@
     if (!currentUser || !myActiveSos) return;
     const helperUid = myActiveSos.helperUid;
     const helperName = myActiveSos.helperName || 'Tình nguyện viên HNUE';
-    const areaKey = myActiveSos.areaKey || 'ktx';
+    const zoneKey = myActiveSos.zoneKey || 'ktx';
     const nowStr = new Date().toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' });
     const verifyCode = 'QR-' + Math.floor(1000 + Math.random() * 9000);
 
-    // 1. Cộng +25 Điểm Ấm cho người đã hỗ trợ (nếu có người tiếp nhận)
+    // 1. Cộng +25 Điểm Ấm cho người đã hỗ trợ
     if (helperUid && allUsersMap[helperUid]) {
       const hUser = allUsersMap[helperUid];
       await rtdb.ref('users/' + helperUid).update({
@@ -541,7 +576,7 @@
         helps: Number(hUser.helps || 0) + 1
       });
       await rtdb.ref('users/' + helperUid + '/history').push({
-        title: `Hỗ trợ: ${myActiveSos.group}`,
+        title: `Hỗ trợ tại ${myActiveSos.area}`,
         partner: `${userProfile.name} (${userProfile.faculty})`,
         time: nowStr,
         code: verifyCode,
@@ -555,7 +590,7 @@
 
     // 2. Ghi lịch sử cho người nhận hỗ trợ & cập nhật bản đồ nhiệt
     await rtdb.ref('users/' + currentUser.uid + '/history').push({
-      title: `Được hỗ trợ: ${myActiveSos.group}`,
+      title: `Được hỗ trợ tại ${myActiveSos.area}`,
       partner: helperName,
       time: nowStr,
       code: verifyCode,
@@ -564,7 +599,7 @@
     });
 
     await rtdb.ref('stats/totalHelps').set(Number(globalStats.totalHelps || 0) + 1);
-    await rtdb.ref('stats/areas/' + areaKey).set(Number((globalStats.areas && globalStats.areas[areaKey]) || 0) + 1);
+    await rtdb.ref('stats/areas/' + zoneKey).set(Number((globalStats.areas && globalStats.areas[zoneKey]) || 0) + 1);
 
     // 3. Đóng tín hiệu SOS
     await rtdb.ref('sos_signals/' + currentUser.uid).remove();
@@ -595,13 +630,13 @@
             <div>
               <div class="vol-title" style="color: #be123c;">🆘 ${sos.name} (${sos.faculty || 'HNUE'})</div>
               <div class="vol-sub" style="color: #0f172a; font-weight: 700;">${sos.group} • ${sos.area}</div>
-              <div class="vol-sub" style="color: #334155; margin-top: 4px;">“${sos.message}”</div>
+              <div class="vol-sub" style="color: #1e293b; margin-top: 4px;">“${sos.message}”</div>
               <div class="vol-gps-meta">GPS: ${Number(sos.lat).toFixed(5)}°N, ${Number(sos.lng).toFixed(5)}°E • Hướng ${sos.dirText}</div>
             </div>
-            <span class="vol-dist-tag" style="background: #fff; color: #e11d48;">${sos.distM}m</span>
+            <span class="vol-dist-tag" style="background: #fff; color: #e11d48; font-size: 0.84rem;">${sos.distM}m</span>
           </div>
           <div class="vol-card-actions" style="grid-template-columns: 1fr;">
-            <button type="button" class="btn-confirm-qr" data-accept-sos-uid="${sos.uid}">
+            <button type="button" class="btn-confirm-qr" data-accept-sos-uid="${sos.uid}" style="font-size: 0.88rem; padding: 10px;">
               ${sos.helperUid === currentUser.uid ? '💬 Tiếp tục nhắn tin hỗ trợ' : '🤝 Tiếp nhận hỗ trợ & Nhắn tin ngay'}
             </button>
           </div>
@@ -616,7 +651,6 @@
         const sos = list.find((x) => x.uid === sosUid);
         if (!sos || !currentUser) return;
 
-        // Đánh dấu mình là người tiếp nhận hỗ trợ trên Firebase
         await rtdb.ref('sos_signals/' + sosUid).update({
           helperUid: currentUser.uid,
           helperName: userProfile.name
@@ -633,7 +667,7 @@
     });
   }
 
-  // 9. Render Radar & Danh sách tình nguyện viên trực tuyến (100% người thật)
+  // 9. Render Radar & Danh sách tình nguyện viên trực tuyến
   let selectedPeerId = null;
   let currentMaxDist = 50000;
 
@@ -642,7 +676,6 @@
     const mapPinsLayer = document.getElementById('dynamicMapPinsLayer');
     const listContainer = document.getElementById('nearbyVolunteersList');
 
-    // Gộp cả người cần giúp (SOS) và người hỗ trợ (Volunteer) lên Radar
     const allLiveEntities = [];
     Object.values(remoteSosSignals).forEach((sos) => {
       allLiveEntities.push({
@@ -708,7 +741,7 @@
     const volunteersOnly = enriched.filter((x) => x.kind !== 'sos');
     if (!volunteersOnly.length) {
       listContainer.innerHTML = `
-        <div class="ui-card" style="text-align: center; font-size: 0.8rem; color: #64748b;">
+        <div class="ui-card" style="text-align: center; font-size: 0.86rem; color: #475569; line-height: 1.55;">
           Hiện chưa có “Người Thắp Lửa” nào khác đang bật GPS trong phạm vi này.<br/>
           <em>Mẹo: Mở link web trên điện thoại thứ 2, tạo tài khoản và bật công tắc “Người Thắp Lửa” để thấy kết nối ngay!</em>
         </div>
@@ -722,7 +755,7 @@
               <div class="vol-left">
                 <div class="vol-badge-avatar" style="background: #dcfce7; color: #15803d;">${p.initials}</div>
                 <div>
-                  <div class="vol-title">${p.name} <span style="font-size: 0.68rem; color: #059669;">● Trực tuyến</span></div>
+                  <div class="vol-title">${p.name} <span style="font-size: 0.76rem; color: #059669;">● Trực tuyến</span></div>
                   <div class="vol-sub">${p.faculty} • ${p.skill}</div>
                   <div class="vol-gps-meta">GPS: ${Number(p.lat).toFixed(5)}°N, ${Number(p.lng).toFixed(5)}°E • Hướng ${p.dirText}</div>
                 </div>
@@ -730,7 +763,7 @@
               <span class="vol-dist-tag">${p.distM}m (~${p.walkMin}p)</span>
             </div>
             <div class="vol-card-actions" style="grid-template-columns: 1fr;">
-              <button type="button" class="btn-chat-vol" data-chat-uid="${p.uid}">
+              <button type="button" class="btn-chat-vol" data-chat-uid="${p.uid}" style="font-size: 0.88rem; padding: 10px;">
                 💬 Nhắn tin trực tiếp
               </button>
             </div>
@@ -810,17 +843,17 @@
 
     const histEl = document.getElementById('verifiedHistoryList');
     if (!userProfile.history.length) {
-      histEl.innerHTML = `<div style="font-size: 0.78rem; color: #64748b; padding: 8px 0;">Chưa có giao dịch hỗ trợ nào được ghi nhận trên tài khoản này.</div>`;
+      histEl.innerHTML = `<div style="font-size: 0.84rem; color: #475569; padding: 8px 0;">Chưa có giao dịch hỗ trợ nào được ghi nhận trên tài khoản này.</div>`;
     } else {
       histEl.innerHTML = userProfile.history
         .map(
           (h) => `
           <div class="history-item">
             <div>
-              <div style="font-weight: 700; color: #0f172a;">${h.title}</div>
-              <div style="font-size: 0.7rem; color: #64748b;">Cùng: ${h.partner} • ${h.time}</div>
+              <div style="font-weight: 700; font-size: 0.88rem; color: #0f172a;">${h.title}</div>
+              <div style="font-size: 0.78rem; color: #475569;">Cùng: ${h.partner} • ${h.time}</div>
             </div>
-            <span style="background: #ecfdf5; color: #047857; font-weight: 800; font-size: 0.68rem; padding: 2px 7px; border-radius: 6px; white-space: nowrap;">
+            <span style="background: #ecfdf5; color: #047857; font-weight: 800; font-size: 0.76rem; padding: 3px 8px; border-radius: 6px; white-space: nowrap;">
               +${h.pointsEarned || 0}đ (${h.code})
             </span>
           </div>
@@ -833,21 +866,23 @@
   function renderHeatmapAndLeaderboard() {
     document.getElementById('weeklySparksCount').textContent = globalStats.totalHelps;
     document.getElementById('ktxSparkCounter').textContent = `${globalStats.areas.ktx || 0} đốm lửa`;
-    document.getElementById('nhaKSparkCounter').textContent = `${globalStats.areas.nha_k || 0} đốm lửa`;
-    document.getElementById('thuVienSparkCounter').textContent = `${globalStats.areas.thu_vien || 0} đốm lửa`;
-    document.getElementById('gddbSparkCounter').textContent = `${globalStats.areas.gddb || 0} đốm lửa`;
+    document.getElementById('nhaKVSparkCounter').textContent = `${globalStats.areas.nha_k_v || 0} đốm lửa`;
+    document.getElementById('hieuBoTvSparkCounter').textContent = `${globalStats.areas.hieu_bo_tv || 0} đốm lửa`;
+    document.getElementById('nhaBCDSparkCounter').textContent = `${globalStats.areas.nha_b_c_d || 0} đốm lửa`;
+    document.getElementById('xuanThuySparkCounter').textContent = `${globalStats.areas.xuan_thuy_123 || 0} đốm lửa`;
+    document.getElementById('svdSparkCounter').textContent = `${globalStats.areas.svd || 0} đốm lửa`;
 
     const lbEl = document.getElementById('facultyLeaderboardList');
     const entries = Object.entries(globalStats.faculties || {}).sort((a, b) => b[1] - a[1]);
     if (!entries.length) {
-      lbEl.innerHTML = `<div style="font-size: 0.78rem; color: #64748b;">Chưa có dữ liệu điểm tích lũy theo Khoa. Bảng xếp hạng sẽ tự động cập nhật khi có lượt hỗ trợ hoàn tất.</div>`;
+      lbEl.innerHTML = `<div style="font-size: 0.84rem; color: #475569;">Chưa có dữ liệu điểm tích lũy theo Khoa. Bảng xếp hạng sẽ tự động cập nhật khi có lượt hỗ trợ hoàn tất.</div>`;
       return;
     }
     const medals = ['🥇', '🥈', '🥉'];
     lbEl.innerHTML = entries
       .map(
         ([fac, score], idx) => `
-        <div class="faculty-rank-item">
+        <div class="faculty-rank-item" style="font-size: 0.88rem;">
           <span>${medals[idx] || '🏅'} <strong>${fac}</strong></span>
           <span class="rank-score-text">${Number(score).toLocaleString('vi-VN')} Điểm Ấm</span>
         </div>
@@ -939,14 +974,27 @@
       return;
     }
 
-    if (!gpsState.isLive) {
-      activateRealGeolocation();
-    }
+    const selectedArea = hnueAreaSelect.value;
+    const chosenLandmark = HNUE_LANDMARKS.find((lm) => lm.name === selectedArea);
 
-    const selectedArea = document.getElementById('hnueAreaSelect').value;
-    const detected = detectNearestHnueLandmark(gpsState.lat, gpsState.lng);
-    const areaText =
-      selectedArea === 'Vị trí GPS thực tế hiện tại của bạn' ? detected.label : selectedArea;
+    let targetLat = gpsState.lat;
+    let targetLng = gpsState.lng;
+    let areaText = selectedArea;
+    let zoneKey = 'ktx';
+
+    if (chosenLandmark) {
+      areaText = chosenLandmark.name;
+      zoneKey = chosenLandmark.zone;
+      if (!gpsState.isLive) {
+        targetLat = chosenLandmark.lat;
+        targetLng = chosenLandmark.lng;
+      }
+    } else {
+      const detected = detectNearestHnueLandmark(gpsState.lat, gpsState.lng);
+      areaText = detected.label;
+      zoneKey = detected.landmark.zone;
+      if (!gpsState.isLive) activateRealGeolocation();
+    }
 
     const sosRef = rtdb.ref('sos_signals/' + currentUser.uid);
     sosRef.onDisconnect().remove();
@@ -957,17 +1005,17 @@
       faculty: userProfile.faculty,
       group: selectedGroup,
       area: areaText,
-      areaKey: detected.landmark.key,
+      zoneKey: zoneKey,
       message: sosMessageInput.value.trim(),
-      lat: gpsState.lat,
-      lng: gpsState.lng,
+      lat: targetLat,
+      lng: targetLng,
       helperUid: null,
       helperName: null,
       createdAt: firebase.database.ServerValue.TIMESTAMP
     });
 
     if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
-    notify('🔥 Đã phát tín hiệu SOS kèm tọa độ GPS lên cơ sở dữ liệu!');
+    notify(`🔥 Đã phát tín hiệu SOS tại ${areaText}!`);
     window.location.hash = '#/radar-500m';
   });
 
@@ -1083,7 +1131,7 @@
     const adminList = document.getElementById('dbLiveSosAdminList');
     const allSos = Object.values(remoteSosSignals).concat(myActiveSos ? [myActiveSos] : []);
     if (!allSos.length) {
-      adminList.innerHTML = `<div style="font-size: 0.76rem; color: #64748b;">Không có tín hiệu SOS nào đang mở trên hệ thống.</div>`;
+      adminList.innerHTML = `<div style="font-size: 0.84rem; color: #475569;">Không có tín hiệu SOS nào đang mở trên hệ thống.</div>`;
       return;
     }
     adminList.innerHTML = allSos
@@ -1091,10 +1139,10 @@
         (s) => `
         <div class="history-item" style="align-items: center;">
           <div>
-            <div style="font-weight: 700; font-size: 0.78rem;">${s.name} • ${s.group}</div>
-            <div style="font-size: 0.7rem; color: #64748b;">${s.area}</div>
+            <div style="font-weight: 700; font-size: 0.86rem;">${s.name} • ${s.group}</div>
+            <div style="font-size: 0.78rem; color: #475569;">${s.area}</div>
           </div>
-          <button type="button" data-admin-del-sos="${s.uid}" style="border: 1px solid #fecaca; background: #fef2f2; color: #dc2626; font-size: 0.7rem; font-weight: 700; padding: 4px 8px; border-radius: 8px; cursor: pointer;">
+          <button type="button" data-admin-del-sos="${s.uid}" style="border: 1px solid #fecaca; background: #fef2f2; color: #dc2626; font-size: 0.78rem; font-weight: 700; padding: 6px 10px; border-radius: 8px; cursor: pointer;">
             Đóng SOS
           </button>
         </div>
@@ -1287,7 +1335,7 @@
 
   const initialUrl = window.location.protocol.startsWith('http')
     ? window.location.href.split('#')[0]
-    : 'https://khanhtanchi21.github.io/hnue-warmlink/';
+    : 'https://hnue-warmlink.vercel.app/';
   customMvpLinkInput.value = initialUrl;
 
   let qrMatrix = [];
