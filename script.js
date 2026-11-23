@@ -63,7 +63,7 @@
     { value: 'Sân vận động', zone: 'khu_vuc_khac', zoneLabel: 'Các khu vực khác', detail: 'Sân vận động', lat: 21.0386, lng: 105.7854 }
   ];
 
-  // 2. State người dùng hiện tại (100% từ cơ sở dữ liệu)
+  // 2. State người dùng hiện tại (100% đồng bộ từ cơ sở dữ liệu)
   let currentUser = null;
   let userProfile = {
     uid: '',
@@ -87,6 +87,10 @@
 
   let myActiveSos = null;
   let lastNotifiedSosKey = '';
+
+  function sanitizeRtdbKey(keyStr) {
+    return String(keyStr || 'Khac').replace(/[.#$\[\]\/]/g, '-').trim();
+  }
 
   // 3. Toast thông báo
   const mobileToast = document.getElementById('mobileToast');
@@ -219,10 +223,16 @@
     }
   });
 
-  let dbListenersAttached = false;
+  let activeListenerUid = null;
+  let globalListenersAttached = false;
+
   auth.onAuthStateChanged(async (user) => {
     currentUser = user;
     if (!user) {
+      if (activeListenerUid) {
+        rtdb.ref('users/' + activeListenerUid).off();
+        activeListenerUid = null;
+      }
       authGateOverlay.classList.remove('hidden');
       return;
     }
@@ -243,33 +253,41 @@
       });
     }
 
-    if (!dbListenersAttached) {
-      dbListenersAttached = true;
-      attachRealtimeDatabaseListeners(user.uid);
+    if (activeListenerUid && activeListenerUid !== user.uid) {
+      rtdb.ref('users/' + activeListenerUid).off();
+      activeListenerUid = null;
+    }
+
+    if (!activeListenerUid) {
+      activeListenerUid = user.uid;
+      rtdb.ref('users/' + user.uid).on('value', (userSnap) => {
+        const val = userSnap.val();
+        if (!val) return;
+        const histObj = val.history || {};
+        const histArray = Object.values(histObj).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+        userProfile = {
+          uid: user.uid,
+          name: val.name || 'Thành viên HNUE',
+          email: val.email || user.email || '',
+          studentId: val.studentId || '',
+          faculty: val.faculty || 'Khoa Công nghệ thông tin',
+          points: Number(val.points || 0),
+          helps: Number(val.helps || 0),
+          history: histArray
+        };
+        syncAllUserUI();
+      });
+    }
+
+    if (!globalListenersAttached) {
+      globalListenersAttached = true;
+      attachGlobalRealtimeListeners();
     }
   });
 
-  // 5. Đồng bộ Realtime Database
-  function attachRealtimeDatabaseListeners(myUid) {
-    rtdb.ref('users/' + myUid).on('value', (snap) => {
-      const val = snap.val();
-      if (!val) return;
-      const histObj = val.history || {};
-      const histArray = Object.values(histObj).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-
-      userProfile = {
-        uid: myUid,
-        name: val.name || 'Thành viên HNUE',
-        email: val.email || currentUser.email || '',
-        studentId: val.studentId || '',
-        faculty: val.faculty || 'Khoa Công nghệ thông tin',
-        points: Number(val.points || 0),
-        helps: Number(val.helps || 0),
-        history: histArray
-      };
-      syncAllUserUI();
-    });
-
+  // 5. Đồng bộ Realtime Database toàn cục
+  function attachGlobalRealtimeListeners() {
     rtdb.ref('users').on('value', (snap) => {
       const data = snap.val() || {};
       Object.keys(allUsersMap).forEach((k) => delete allUsersMap[k]);
@@ -280,6 +298,7 @@
     rtdb.ref('beacons').on('value', (snap) => {
       const data = snap.val() || {};
       const now = Date.now();
+      const myUid = currentUser ? currentUser.uid : '';
       Object.keys(remoteBeacons).forEach((k) => delete remoteBeacons[k]);
 
       Object.keys(data).forEach((uid) => {
@@ -313,6 +332,7 @@
     rtdb.ref('sos_signals').on('value', (snap) => {
       const data = snap.val() || {};
       const now = Date.now();
+      const myUid = currentUser ? currentUser.uid : '';
       const hadActiveSos = Boolean(myActiveSos);
       Object.keys(remoteSosSignals).forEach((k) => delete remoteSosSignals[k]);
       myActiveSos = null;
@@ -554,10 +574,12 @@
     );
   });
 
-  // 7. Quy trình Mã QR / Mã PIN 4 số xác minh hỗ trợ
+  // 7. Quy trình Mã QR / Mã PIN 4 số xác minh hỗ trợ (Đa nền tảng iOS + Android + Desktop)
   const showVerifyQrModal = document.getElementById('showVerifyQrModal');
   const sosVerifyQrHolder = document.getElementById('sosVerifyQrHolder');
   const sosVerifyPinText = document.getElementById('sosVerifyPinText');
+  const chatWithMyHelperBtn = document.getElementById('chatWithMyHelperBtn');
+  const myActiveSosActions = document.getElementById('myActiveSosActions');
 
   function renderMyActiveSosBanner() {
     const banner = document.getElementById('myActiveSosBanner');
@@ -569,23 +591,38 @@
     const statusTag = document.getElementById('myActiveSosStatusTag');
     const textEl = document.getElementById('myActiveSosText');
 
-    if (myActiveSos.helperName) {
+    if (myActiveSos.helperUid && myActiveSos.helperName) {
       statusTag.textContent = `✓ ${myActiveSos.helperName} đang hỗ trợ`;
       statusTag.style.background = '#dcfce7';
       statusTag.style.color = '#15803d';
+      chatWithMyHelperBtn.style.display = 'inline-flex';
+      myActiveSosActions.style.gridTemplateColumns = '1.4fr 1fr 0.75fr';
     } else {
       statusTag.textContent = 'Đang phát sóng...';
       statusTag.style.background = '#ffffff';
       statusTag.style.color = '#e11d48';
+      chatWithMyHelperBtn.style.display = 'none';
+      myActiveSosActions.style.gridTemplateColumns = '1.6fr 0.8fr';
     }
     textEl.textContent = `[${myActiveSos.group} • ${myActiveSos.area}] ${myActiveSos.message}`;
   }
+
+  chatWithMyHelperBtn.addEventListener('click', () => {
+    if (!myActiveSos || !myActiveSos.helperUid) return;
+    openSafeChat({
+      uid: myActiveSos.helperUid,
+      name: myActiveSos.helperName || 'Người Thắp Lửa',
+      faculty: 'ĐHSP Hà Nội',
+      distM: 0,
+      dirText: 'gần bạn'
+    });
+  });
 
   document.getElementById('showVerifyQrBtn').addEventListener('click', () => {
     if (!myActiveSos) return;
     const pin = String(myActiveSos.verifyPin || '1234');
     const qrPayload = `HNUEWL:${myActiveSos.uid}:${pin}`;
-    renderQrSvgInto(sosVerifyQrHolder, qrPayload, 185);
+    renderQrSvgInto(sosVerifyQrHolder, qrPayload, 190);
     sosVerifyPinText.textContent = pin;
     showVerifyQrModal.classList.add('open');
   });
@@ -602,12 +639,17 @@
 
   // Modal Quét QR / Nhập mã 4 số dành cho Người hỗ trợ
   const scanVerifyQrModal = document.getElementById('scanVerifyQrModal');
+  const cameraScanBox = document.getElementById('cameraScanBox');
   const qrScannerVideo = document.getElementById('qrScannerVideo');
   const cameraScanStatus = document.getElementById('cameraScanStatus');
   const manualVerifyPinInput = document.getElementById('manualVerifyPinInput');
+  const offscreenScanCanvas = document.createElement('canvas');
+  const offscreenScanCtx = offscreenScanCanvas.getContext('2d', { willReadFrequently: true });
+
   let activeVerifyTargetSos = null;
   let cameraStream = null;
   let scanIntervalId = null;
+  let isVerifyingNow = false;
 
   function stopVerifyCamera() {
     if (scanIntervalId) {
@@ -621,132 +663,180 @@
     qrScannerVideo.srcObject = null;
   }
 
+  function handleDecodedQrString(rawText) {
+    const raw = String(rawText || '').trim();
+    if (!raw.startsWith('HNUEWL:')) return false;
+    const parts = raw.split(':');
+    const targetUid = parts[1] || '';
+    const scannedPin = parts[2] || '';
+    if (scannedPin.length === 4) {
+      if (targetUid && remoteSosSignals[targetUid]) {
+        activeVerifyTargetSos = remoteSosSignals[targetUid];
+      }
+      manualVerifyPinInput.value = scannedPin;
+      verifyAndCompleteSos(scannedPin);
+      return true;
+    }
+    return false;
+  }
+
   async function startVerifyCamera() {
     manualVerifyPinInput.value = '';
+    cameraScanBox.style.display = 'flex';
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      cameraScanStatus.textContent = 'Thiết bị không hỗ trợ camera trực tiếp. Hãy nhập mã 4 số bên dưới.';
+      cameraScanBox.style.display = 'none';
+      cameraScanStatus.textContent = 'Thiết bị không có camera trực tiếp — hãy nhập mã 4 số bên dưới.';
       return;
     }
     try {
       cameraStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' }
+        video: { facingMode: { ideal: 'environment' } },
+        audio: false
       });
       qrScannerVideo.srcObject = cameraStream;
       await qrScannerVideo.play();
 
-      if ('BarcodeDetector' in window) {
-        cameraScanStatus.textContent = '📷 Đang quét mã QR trên màn hình người được giúp...';
-        const detector = new window.BarcodeDetector({ formats: ['qr_code'] });
+      const hasNativeDetector = 'BarcodeDetector' in window;
+      const hasJsQr = typeof window.jsQR === 'function';
+
+      if (hasNativeDetector || hasJsQr) {
+        cameraScanStatus.textContent = '📷 Đưa mã QR trên màn hình người được giúp vào khung xanh...';
+        const nativeDetector = hasNativeDetector ? new window.BarcodeDetector({ formats: ['qr_code'] }) : null;
+
         scanIntervalId = setInterval(async () => {
-          if (!activeVerifyTargetSos || qrScannerVideo.readyState < 2) return;
-          try {
-            const codes = await detector.detect(qrScannerVideo);
-            if (codes && codes.length > 0) {
-              const raw = (codes[0].rawValue || '').trim();
-              if (raw.startsWith('HNUEWL:')) {
-                const parts = raw.split(':');
-                const scannedPin = parts[2] || '';
-                if (scannedPin) {
-                  manualVerifyPinInput.value = scannedPin;
-                  await verifyAndCompleteSos(scannedPin);
-                }
+          if (!activeVerifyTargetSos || isVerifyingNow || qrScannerVideo.readyState < 2) return;
+
+          if (nativeDetector) {
+            try {
+              const codes = await nativeDetector.detect(qrScannerVideo);
+              if (codes && codes.length > 0 && handleDecodedQrString(codes[0].rawValue)) {
+                return;
               }
-            }
-          } catch (e) {}
-        }, 500);
+            } catch (e) {}
+          }
+
+          if (hasJsQr && qrScannerVideo.videoWidth > 0 && qrScannerVideo.videoHeight > 0) {
+            try {
+              const w = Math.min(480, qrScannerVideo.videoWidth);
+              const h = Math.round((qrScannerVideo.videoHeight / qrScannerVideo.videoWidth) * w);
+              offscreenScanCanvas.width = w;
+              offscreenScanCanvas.height = h;
+              offscreenScanCtx.drawImage(qrScannerVideo, 0, 0, w, h);
+              const imgData = offscreenScanCtx.getImageData(0, 0, w, h);
+              const code = window.jsQR(imgData.data, w, h, { inversionAttempts: 'dontInvert' });
+              if (code && code.data) {
+                handleDecodedQrString(code.data);
+              }
+            } catch (e) {}
+          }
+        }, 380);
       } else {
-        cameraScanStatus.textContent = 'Trình duyệt chưa hỗ trợ tự động đọc QR — hãy nhập nhanh mã 4 số bên dưới.';
+        cameraScanStatus.textContent = 'Nhập nhanh mã 4 số từ màn hình người được giúp bên dưới.';
       }
     } catch (err) {
-      cameraScanStatus.textContent = 'Chưa mở được camera. Bạn có thể nhập trực tiếp mã 4 số bên dưới.';
+      cameraScanBox.style.display = 'none';
+      cameraScanStatus.textContent = 'Chưa mở được camera — hãy nhập trực tiếp mã 4 số bên dưới.';
     }
   }
 
   function openScanVerifyModal(sos) {
     activeVerifyTargetSos = sos;
+    isVerifyingNow = false;
     document.getElementById('scanVerifyTargetDesc').textContent =
       `Quét mã QR hoặc nhập mã 4 số từ ${sos.name} để xác nhận hoàn tất`;
     scanVerifyQrModal.classList.add('open');
     startVerifyCamera();
   }
 
-  document.getElementById('closeScanVerifyQrBtn').addEventListener('click', () => {
+  function closeScanVerifyModal() {
     stopVerifyCamera();
     activeVerifyTargetSos = null;
+    isVerifyingNow = false;
     scanVerifyQrModal.classList.remove('open');
+  }
+
+  document.getElementById('closeScanVerifyQrBtn').addEventListener('click', closeScanVerifyModal);
+
+  manualVerifyPinInput.addEventListener('input', () => {
+    manualVerifyPinInput.value = manualVerifyPinInput.value.replace(/\D/g, '').slice(0, 4);
+    if (manualVerifyPinInput.value.length === 4) {
+      verifyAndCompleteSos(manualVerifyPinInput.value);
+    }
   });
 
   async function verifyAndCompleteSos(enteredCode) {
-    if (!currentUser || !activeVerifyTargetSos) return;
+    if (!currentUser || !activeVerifyTargetSos || isVerifyingNow) return;
     const cleanPin = String(enteredCode || '').trim();
     if (cleanPin.length !== 4) {
       notify('⚠ Vui lòng nhập đủ 4 chữ số xác nhận.');
       return;
     }
 
-    // Kiểm tra dữ liệu mới nhất trên Firebase
-    const sosSnap = await rtdb.ref('sos_signals/' + activeVerifyTargetSos.uid).once('value');
-    const liveSos = sosSnap.val();
-    if (!liveSos) {
-      stopVerifyCamera();
-      scanVerifyQrModal.classList.remove('open');
-      notify('Tín hiệu hỗ trợ này đã được đóng trước đó.');
-      return;
+    isVerifyingNow = true;
+    try {
+      const sosSnap = await rtdb.ref('sos_signals/' + activeVerifyTargetSos.uid).once('value');
+      const liveSos = sosSnap.val();
+      if (!liveSos) {
+        closeScanVerifyModal();
+        notify('Tín hiệu hỗ trợ này đã được đóng trước đó.');
+        return;
+      }
+
+      if (String(liveSos.verifyPin) !== cleanPin) {
+        isVerifyingNow = false;
+        notify('❌ Mã xác nhận không khớp! Hãy kiểm tra lại mã trên máy người được giúp.');
+        return;
+      }
+
+      closeScanVerifyModal();
+
+      const nowStr = new Date().toLocaleString('vi-VN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+      const receiptCode = 'QR-' + cleanPin;
+
+      // 1. Cộng +25 Điểm Ấm & +1 lượt hỗ trợ cho người giúp
+      await rtdb.ref('users/' + currentUser.uid).update({
+        points: Number(userProfile.points || 0) + 25,
+        helps: Number(userProfile.helps || 0) + 1
+      });
+      await rtdb.ref('users/' + currentUser.uid + '/history').push({
+        title: `Hỗ trợ tại ${liveSos.area}`,
+        partner: `${liveSos.name} (${liveSos.faculty || 'HNUE'})`,
+        time: nowStr,
+        code: receiptCode,
+        pointsEarned: 25,
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+      });
+
+      // 2. Ghi lịch sử cho người được giúp
+      await rtdb.ref('users/' + liveSos.uid + '/history').push({
+        title: `Được hỗ trợ tại ${liveSos.area}`,
+        partner: `${userProfile.name} (${userProfile.faculty})`,
+        time: nowStr,
+        code: receiptCode,
+        pointsEarned: 0,
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+      });
+
+      // 3. Cập nhật thống kê bản đồ nhiệt 4 khu vực & bảng xếp hạng Khoa
+      const zoneKey = liveSos.zoneKey || 'giang_duong';
+      const myFacKey = sanitizeRtdbKey(userProfile.faculty || 'Khoa Công nghệ thông tin');
+      await rtdb.ref('stats/totalHelps').set(Number(globalStats.totalHelps || 0) + 1);
+      await rtdb.ref('stats/areas/' + zoneKey).set(Number((globalStats.areas && globalStats.areas[zoneKey]) || 0) + 1);
+      await rtdb.ref('stats/faculties/' + myFacKey).set(Number((globalStats.faculties && globalStats.faculties[myFacKey]) || 0) + 25);
+
+      // 4. Xóa tín hiệu SOS đã hoàn thành
+      await rtdb.ref('sos_signals/' + liveSos.uid).remove();
+      notify('🎉 Xác minh QR thành công! Bạn đã nhận +25 Điểm Ấm.');
+    } catch (err) {
+      isVerifyingNow = false;
+      notify('⚠ Có lỗi kết nối khi xác minh. Vui lòng thử lại.');
     }
-
-    if (String(liveSos.verifyPin) !== cleanPin) {
-      notify('❌ Mã xác nhận không khớp! Hãy kiểm tra lại mã trên máy người được giúp.');
-      return;
-    }
-
-    // Mã chính xác -> Ghi nhận hoàn thành cho cả hai bên
-    stopVerifyCamera();
-    scanVerifyQrModal.classList.remove('open');
-
-    const nowStr = new Date().toLocaleString('vi-VN', {
-      hour: '2-digit',
-      minute: '2-digit',
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
-    const receiptCode = 'QR-' + cleanPin;
-
-    // 1. Cộng +25 Điểm Ấm & +1 lượt hỗ trợ cho người giúp
-    await rtdb.ref('users/' + currentUser.uid).update({
-      points: Number(userProfile.points || 0) + 25,
-      helps: Number(userProfile.helps || 0) + 1
-    });
-    await rtdb.ref('users/' + currentUser.uid + '/history').push({
-      title: `Hỗ trợ tại ${liveSos.area}`,
-      partner: `${liveSos.name} (${liveSos.faculty || 'HNUE'})`,
-      time: nowStr,
-      code: receiptCode,
-      pointsEarned: 25,
-      timestamp: firebase.database.ServerValue.TIMESTAMP
-    });
-
-    // 2. Ghi lịch sử cho người được giúp
-    await rtdb.ref('users/' + liveSos.uid + '/history').push({
-      title: `Được hỗ trợ tại ${liveSos.area}`,
-      partner: `${userProfile.name} (${userProfile.faculty})`,
-      time: nowStr,
-      code: receiptCode,
-      pointsEarned: 0,
-      timestamp: firebase.database.ServerValue.TIMESTAMP
-    });
-
-    // 3. Cập nhật thống kê bản đồ nhiệt 4 khu vực & bảng xếp hạng Khoa
-    const zoneKey = liveSos.zoneKey || 'giang_duong';
-    const myFac = userProfile.faculty || 'Khoa Công nghệ thông tin';
-    await rtdb.ref('stats/totalHelps').set(Number(globalStats.totalHelps || 0) + 1);
-    await rtdb.ref('stats/areas/' + zoneKey).set(Number((globalStats.areas && globalStats.areas[zoneKey]) || 0) + 1);
-    await rtdb.ref('stats/faculties/' + myFac).set(Number((globalStats.faculties && globalStats.faculties[myFac]) || 0) + 25);
-
-    // 4. Xóa tín hiệu SOS đã hoàn thành
-    await rtdb.ref('sos_signals/' + liveSos.uid).remove();
-    activeVerifyTargetSos = null;
-    notify('🎉 Xác minh QR thành công! Bạn đã nhận +25 Điểm Ấm.');
   }
 
   document.getElementById('submitVerifyPinBtn').addEventListener('click', () => {
@@ -772,6 +862,13 @@
     container.innerHTML = list
       .map((sos) => {
         const isAcceptedByMe = currentUser && sos.helperUid === currentUser.uid;
+        const acceptedByOther = sos.helperUid && !isAcceptedByMe;
+        const helperStatusBadge = isAcceptedByMe
+          ? `<div style="font-size: 0.78rem; font-weight: 700; color: #059669; margin-top: 4px;">✓ Bạn đang tiếp nhận yêu cầu này</div>`
+          : acceptedByOther
+          ? `<div style="font-size: 0.78rem; font-weight: 700; color: #d97706; margin-top: 4px;">⏳ ${sos.helperName || 'Thành viên khác'} đang hỗ trợ</div>`
+          : '';
+
         return `
         <div class="vol-card" style="border-color: #f43f5e; background: #fff1f2;">
           <div class="vol-card-top">
@@ -780,20 +877,17 @@
               <div class="vol-sub" style="color: #0f172a; font-weight: 700;">${sos.group} • ${sos.area}</div>
               <div class="vol-sub" style="color: #1e293b; margin-top: 4px;">“${sos.message}”</div>
               <div class="vol-gps-meta">GPS: ${Number(sos.lat).toFixed(5)}°N, ${Number(sos.lng).toFixed(5)}°E • Hướng ${sos.dirText}</div>
+              ${helperStatusBadge}
             </div>
             <span class="vol-dist-tag" style="background: #fff; color: #e11d48; font-size: 0.84rem;">${sos.distM}m</span>
           </div>
-          <div class="vol-card-actions" style="grid-template-columns: ${isAcceptedByMe ? '1fr 1.35fr' : '1fr'};">
-            <button type="button" class="btn-chat-vol" data-accept-sos-uid="${sos.uid}" style="font-size: 0.86rem; padding: 10px;">
-              ${isAcceptedByMe ? '💬 Nhắn tin' : '🤝 Tiếp nhận & Nhắn tin'}
+          <div class="vol-card-actions" style="grid-template-columns: 1fr 1.25fr;">
+            <button type="button" class="btn-chat-vol" data-accept-sos-uid="${sos.uid}" style="font-size: 0.84rem; padding: 10px;">
+              ${isAcceptedByMe ? '💬 Nhắn tin' : '🤝 Nhận & Nhắn tin'}
             </button>
-            ${
-              isAcceptedByMe
-                ? `<button type="button" class="btn-confirm-qr" data-verify-sos-uid="${sos.uid}" style="font-size: 0.86rem; padding: 10px;">
-                    📷 Quét / Nhập mã xong
-                  </button>`
-                : ''
-            }
+            <button type="button" class="btn-confirm-qr" data-verify-sos-uid="${sos.uid}" style="font-size: 0.84rem; padding: 10px;">
+              📷 Quét mã xác nhận
+            </button>
           </div>
         </div>
       `;
@@ -904,8 +998,9 @@
     const volunteersOnly = enriched.filter((x) => x.kind !== 'sos');
     if (!volunteersOnly.length) {
       listContainer.innerHTML = `
-        <div class="ui-card" style="text-align: center; font-size: 0.86rem; color: #475569; line-height: 1.55;">
-          Hiện chưa có “Người Thắp Lửa” nào khác đang trực tuyến trong phạm vi này.
+        <div class="ui-card empty-state-box">
+          <span class="empty-state-icon">📡</span>
+          Hiện chưa có “Người Thắp Lửa” nào khác đang bật chế độ trực tuyến trong phạm vi này.
         </div>
       `;
     } else {
@@ -1004,7 +1099,7 @@
 
     const histEl = document.getElementById('verifiedHistoryList');
     if (!userProfile.history.length) {
-      histEl.innerHTML = `<div style="font-size: 0.84rem; color: #475569; padding: 8px 0;">Chưa có giao dịch hỗ trợ nào được ghi nhận trên tài khoản này.</div>`;
+      histEl.innerHTML = `<div class="empty-state-box" style="padding: 14px 6px;">Chưa có giao dịch hỗ trợ nào được ghi nhận trên tài khoản này.</div>`;
     } else {
       histEl.innerHTML = userProfile.history
         .map(
@@ -1034,7 +1129,7 @@
     const lbEl = document.getElementById('facultyLeaderboardList');
     const entries = Object.entries(globalStats.faculties || {}).sort((a, b) => b[1] - a[1]);
     if (!entries.length) {
-      lbEl.innerHTML = `<div style="font-size: 0.84rem; color: #475569;">Chưa có dữ liệu điểm tích lũy theo Khoa / Đơn vị.</div>`;
+      lbEl.innerHTML = `<div class="empty-state-box" style="padding: 12px 6px;">Chưa có dữ liệu điểm tích lũy theo Khoa / Đơn vị.</div>`;
       return;
     }
     const medals = ['🥇', '🥈', '🥉'];
@@ -1191,11 +1286,11 @@
       activeChatRef = null;
     }
 
-    document.getElementById('chatPartnerName').textContent = `${peer.name} (${peer.distM}m)`;
+    document.getElementById('chatPartnerName').textContent = peer.distM > 0 ? `${peer.name} (${peer.distM}m)` : peer.name;
     document.getElementById('chatPartnerMeta').textContent = `✓ ${peer.faculty} • Kết nối trực tiếp`;
     chatMessagesBox.innerHTML = `
       <div class="chat-bubble incoming">
-        Kênh trao đổi trực tiếp với ${peer.name} (cách ${peer.distM}m, hướng ${peer.dirText}).
+        Kênh trao đổi trực tiếp với ${peer.name}.
       </div>
     `;
 
@@ -1212,6 +1307,14 @@
     });
 
     safeChatModal.classList.add('open');
+  }
+
+  function closeSafeChat() {
+    if (activeChatRef) {
+      activeChatRef.off();
+      activeChatRef = null;
+    }
+    safeChatModal.classList.remove('open');
   }
 
   async function sendChatMessage(text) {
@@ -1233,13 +1336,7 @@
   chatInputBox.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') sendChatMessage(chatInputBox.value);
   });
-  document.getElementById('closeChatModalBtn').addEventListener('click', () => {
-    if (activeChatRef) {
-      activeChatRef.off();
-      activeChatRef = null;
-    }
-    safeChatModal.classList.remove('open');
-  });
+  document.getElementById('closeChatModalBtn').addEventListener('click', closeSafeChat);
 
   // 14. Modal Hồ sơ cá nhân, Đăng xuất & Kiểm soát Cơ sở dữ liệu
   const profileModal = document.getElementById('profileModal');
@@ -1269,6 +1366,8 @@
     if (currentUser) {
       await rtdb.ref('beacons/' + currentUser.uid).remove();
     }
+    gpsState.beaconOn = false;
+    volunteerBeaconSwitch.classList.remove('on');
     profileModal.classList.remove('open');
     await auth.signOut();
     notify('Đã đăng xuất tài khoản.');
@@ -1319,12 +1418,31 @@
   });
   document.getElementById('closeDbControlBtn').addEventListener('click', () => dbControlModal.classList.remove('open'));
 
-  // 15. Modal Chứng nhận
+  // 15. Modal Chứng nhận & Đóng Modal linh hoạt khi bấm nền tối hoặc phím Esc
   const certSheetModal = document.getElementById('certSheetModal');
   document.getElementById('openFullCertBtn').addEventListener('click', () => certSheetModal.classList.add('open'));
   document.getElementById('closeCertSheetBtn').addEventListener('click', () => certSheetModal.classList.remove('open'));
 
-  // 16. Trình tạo mã QR chuẩn (Reed-Solomon QR Code)
+  function closeAllModalsSafely() {
+    closeScanVerifyModal();
+    closeSafeChat();
+    showVerifyQrModal.classList.remove('open');
+    profileModal.classList.remove('open');
+    dbControlModal.classList.remove('open');
+    certSheetModal.classList.remove('open');
+  }
+
+  document.querySelectorAll('.modal-overlay').forEach((overlay) => {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closeAllModalsSafely();
+    });
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeAllModalsSafely();
+  });
+
+  // 16. Trình tạo mã QR chuẩn ISO (Reed-Solomon QR Code)
   const QRGen = (function () {
     const EXP = new Array(256);
     const LOG = new Array(256);
@@ -1485,17 +1603,17 @@
   function renderQrSvgInto(containerEl, textStr, pxSize) {
     const matrix = QRGen.createMatrix(textStr);
     const n = matrix.length;
-    const quiet = 2;
+    const quiet = 4;
     const total = n + quiet * 2;
     let rects = '';
     for (let r = 0; r < n; r++) {
       for (let c = 0; c < n; c++) {
         if (matrix[r][c] === 1) {
-          rects += `<rect x="${c + quiet}" y="${r + quiet}" width="1" height="1" rx="0.18" fill="#0f172a"/>`;
+          rects += `<rect x="${c + quiet}" y="${r + quiet}" width="1" height="1" fill="#0f172a"/>`;
         }
       }
     }
-    containerEl.innerHTML = `<svg width="${pxSize}" height="${pxSize}" viewBox="0 0 ${total} ${total}" xmlns="http://www.w3.org/2000/svg"><rect width="${total}" height="${total}" fill="#ffffff"/>${rects}</svg>`;
+    containerEl.innerHTML = `<svg width="${pxSize}" height="${pxSize}" viewBox="0 0 ${total} ${total}" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect width="${total}" height="${total}" fill="#ffffff"/>${rects}</svg>`;
     return matrix;
   }
 
@@ -1512,7 +1630,7 @@
   function drawMobileQr(urlStr) {
     const clean = (urlStr || initialUrl).trim();
     qrLinkCaption.textContent = clean;
-    qrMatrix = renderQrSvgInto(mobileQrHolder, clean, 172);
+    qrMatrix = renderQrSvgInto(mobileQrHolder, clean, 176);
   }
   drawMobileQr(customMvpLinkInput.value);
 
@@ -1522,7 +1640,7 @@
     drawMobileQr(customMvpLinkInput.value);
     if (!qrMatrix.length) return;
     const n = qrMatrix.length;
-    const quiet = 3;
+    const quiet = 4;
     const scale = 18;
     const size = (n + quiet * 2) * scale;
     const canvas = document.createElement('canvas');
