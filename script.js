@@ -5,7 +5,7 @@
   const firebaseConfig = {
     apiKey: "AIzaSyCV3MdX8zQ1bPpYocMphIDubr_KpZnmnEc",
     authDomain: "hnue-warmlink.firebaseapp.com",
-    databaseURL: "https://hnue-warmlink-default-rtdb.asia-southeast1.firebasedatabase.app",
+    databaseURL: "[https://hnue-warmlink-default-rtdb.asia-southeast1.firebasedatabase.app](https://hnue-warmlink-default-rtdb.asia-southeast1.firebasedatabase.app)",
     projectId: "hnue-warmlink",
     storageBucket: "hnue-warmlink.firebasestorage.app",
     messagingSenderId: "462605682082",
@@ -78,7 +78,6 @@
 
   const remoteBeacons = {};
   const remoteSosSignals = {};
-  const allUsersMap = {};
   let globalStats = {
     totalHelps: 0,
     areas: { hanh_chinh: 0, giang_duong: 0, ky_tuc_xa: 0, khu_vuc_khac: 0 },
@@ -286,15 +285,8 @@
     }
   });
 
-  // 5. Đồng bộ Realtime Database toàn cục
+  // 5. Đồng bộ Realtime Database (chỉ lấy dữ liệu công khai cần thiết cho Radar & Bản đồ nhiệt)
   function attachGlobalRealtimeListeners() {
-    rtdb.ref('users').on('value', (snap) => {
-      const data = snap.val() || {};
-      Object.keys(allUsersMap).forEach((k) => delete allUsersMap[k]);
-      Object.assign(allUsersMap, data);
-      updateDbAdminPanel();
-    });
-
     rtdb.ref('beacons').on('value', (snap) => {
       const data = snap.val() || {};
       const now = Date.now();
@@ -325,7 +317,6 @@
           };
         }
       });
-      updateDbAdminPanel();
       renderRadarAndNearbyList();
     });
 
@@ -361,7 +352,6 @@
       renderMyActiveSosBanner();
       renderIncomingSosList();
       renderRadarAndNearbyList();
-      updateDbAdminPanel();
 
       if (newestIncoming) {
         const key = newestIncoming.uid + '_' + (newestIncoming.createdAt || '');
@@ -381,7 +371,6 @@
         faculties: val.faculties || {}
       };
       renderHeatmapAndLeaderboard();
-      updateDbAdminPanel();
     });
   }
 
@@ -1338,7 +1327,7 @@
   });
   document.getElementById('closeChatModalBtn').addEventListener('click', closeSafeChat);
 
-  // 14. Modal Hồ sơ cá nhân, Đăng xuất & Kiểm soát Cơ sở dữ liệu
+  // 14. Modal Hồ sơ cá nhân & Đăng xuất
   const profileModal = document.getElementById('profileModal');
   document.getElementById('openProfileModalBtn').addEventListener('click', () => {
     document.getElementById('inputStudentName').value = userProfile.name;
@@ -1373,51 +1362,6 @@
     notify('Đã đăng xuất tài khoản.');
   });
 
-  const dbControlModal = document.getElementById('dbControlModal');
-  function updateDbAdminPanel() {
-    document.getElementById('dbStatUsers').textContent = Object.keys(allUsersMap).length;
-    document.getElementById('dbStatBeacons').textContent = Object.keys(remoteBeacons).length + (gpsState.beaconOn ? 1 : 0);
-    document.getElementById('dbStatSos').textContent = Object.keys(remoteSosSignals).length + (myActiveSos ? 1 : 0);
-    document.getElementById('dbStatHelps').textContent = globalStats.totalHelps || 0;
-
-    const adminList = document.getElementById('dbLiveSosAdminList');
-    const allSos = Object.values(remoteSosSignals).concat(myActiveSos ? [myActiveSos] : []);
-    if (!allSos.length) {
-      adminList.innerHTML = `<div style="font-size: 0.84rem; color: #475569;">Không có tín hiệu SOS nào đang mở trên hệ thống.</div>`;
-      return;
-    }
-    adminList.innerHTML = allSos
-      .map(
-        (s) => `
-        <div class="history-item" style="align-items: center;">
-          <div>
-            <div style="font-weight: 700; font-size: 0.86rem;">${s.name} • ${s.group}</div>
-            <div style="font-size: 0.78rem; color: #475569;">${s.area} • Mã: ${s.verifyPin || '----'}</div>
-          </div>
-          <button type="button" data-admin-del-sos="${s.uid}" style="border: 1px solid #fecaca; background: #fef2f2; color: #dc2626; font-size: 0.78rem; font-weight: 700; padding: 6px 10px; border-radius: 8px; cursor: pointer;">
-            Đóng SOS
-          </button>
-        </div>
-      `
-      )
-      .join('');
-
-    adminList.querySelectorAll('[data-admin-del-sos]').forEach((b) => {
-      b.addEventListener('click', async () => {
-        const uid = b.getAttribute('data-admin-del-sos');
-        await rtdb.ref('sos_signals/' + uid).remove();
-        notify('✓ Đã đóng tín hiệu SOS trên cơ sở dữ liệu.');
-      });
-    });
-  }
-
-  document.getElementById('openDbControlBtn').addEventListener('click', () => {
-    profileModal.classList.remove('open');
-    updateDbAdminPanel();
-    dbControlModal.classList.add('open');
-  });
-  document.getElementById('closeDbControlBtn').addEventListener('click', () => dbControlModal.classList.remove('open'));
-
   // 15. Modal Chứng nhận & Đóng Modal linh hoạt khi bấm nền tối hoặc phím Esc
   const certSheetModal = document.getElementById('certSheetModal');
   document.getElementById('openFullCertBtn').addEventListener('click', () => certSheetModal.classList.add('open'));
@@ -1428,7 +1372,6 @@
     closeSafeChat();
     showVerifyQrModal.classList.remove('open');
     profileModal.classList.remove('open');
-    dbControlModal.classList.remove('open');
     certSheetModal.classList.remove('open');
   }
 
@@ -1613,7 +1556,7 @@
         }
       }
     }
-    containerEl.innerHTML = `<svg width="${pxSize}" height="${pxSize}" viewBox="0 0 ${total} ${total}" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect width="${total}" height="${total}" fill="#ffffff"/>${rects}</svg>`;
+    containerEl.innerHTML = `<svg width="${pxSize}" height="${pxSize}" viewBox="0 0 ${total} ${total}" shape-rendering="crispEdges" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)"><rect width="${total}" height="${total}" fill="#ffffff"/>${rects}</svg>`;
     return matrix;
   }
 
@@ -1623,7 +1566,7 @@
 
   const initialUrl = window.location.protocol.startsWith('http')
     ? window.location.href.split('#')[0]
-    : 'https://hnue-warmlink.vercel.app/';
+    : '[https://hnue-warmlink.vercel.app/](https://hnue-warmlink.vercel.app/)';
   customMvpLinkInput.value = initialUrl;
 
   let qrMatrix = [];
