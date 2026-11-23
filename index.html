@@ -1188,5 +1188,65 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
   <script src="script.js"></script>
+
+
+  <!-- Nút truy cập nhanh Cổng Quản Trị (Chỉ hiển thị với tài khoản Admin) -->
+<script>
+  (function () {
+    function initAdminShortcut() {
+      if (!window.firebase || !firebase.apps || !firebase.apps.length) return;
+      const auth = firebase.auth();
+      const rtdb = firebase.database();
+
+      auth.onAuthStateChanged(async (user) => {
+        const existingBtn = document.getElementById('quickAdminPortalBtn');
+        if (!user) {
+          if (existingBtn) existingBtn.remove();
+          return;
+        }
+
+        try {
+          const snap = await rtdb.ref('admins/' + user.uid).once('value');
+          if (snap.exists() && snap.val()) {
+            if (existingBtn) return;
+            const btn = document.createElement('a');
+            btn.id = 'quickAdminPortalBtn';
+            btn.href = 'admin.html';
+            btn.innerHTML = '🛡️ Quản trị';
+            btn.title = 'Mở Trung tâm Điều hành HNUE WarmLink';
+            Object.assign(btn.style, {
+              position: 'fixed',
+              bottom: '84px',
+              right: '16px',
+              zIndex: '9990',
+              background: '#0f172a',
+              color: '#ffffff',
+              border: '1.5px solid #ea580c',
+              padding: '9px 14px',
+              borderRadius: '999px',
+              fontSize: '13px',
+              fontWeight: '700',
+              textDecoration: 'none',
+              boxShadow: '0 8px 20px rgba(15, 23, 42, 0.35)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px'
+            });
+            document.body.appendChild(btn);
+          } else if (existingBtn) {
+            existingBtn.remove();
+          }
+        } catch (e) {}
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initAdminShortcut);
+    } else {
+      initAdminShortcut();
+    }
+  })();
+</script>
+
 </body>
 </html>
