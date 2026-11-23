@@ -19,37 +19,58 @@
   const auth = firebase.auth();
   const rtdb = firebase.database();
 
-  // 1. Tọa độ 17 địa điểm thực tế tại Trường Đại học Sư phạm Hà Nội
+  // 1. Danh sách đầy đủ địa điểm chia theo 4 khu vực tại Trường ĐHSP Hà Nội
   const HNUE_LANDMARKS = [
-    // Khu Ký túc xá
-    { key: 'nha_a1_ktx', zone: 'ktx', name: 'Nhà A1 (Khu KTX)', lat: 21.0396, lng: 105.7818 },
-    { key: 'nha_a2_ktx', zone: 'ktx', name: 'Nhà A2 (Khu KTX)', lat: 21.0394, lng: 105.7823 },
-    { key: 'nha_a3_ktx', zone: 'ktx', name: 'Nhà A3 (Khu KTX)', lat: 21.0391, lng: 105.7817 },
-    { key: 'nha_a4_ktx', zone: 'ktx', name: 'Nhà A4 (Khu KTX)', lat: 21.0389, lng: 105.7822 },
-    { key: 'ktx_a12', zone: 'ktx', name: 'Tòa KTX A12', lat: 21.0398, lng: 105.7826 },
-    // Giảng đường & Khu chức năng
-    { key: 'nha_hieu_bo', zone: 'hieu_bo_tv', name: 'Nhà Hiệu bộ', lat: 21.0372, lng: 105.7834 },
-    { key: 'thu_vien', zone: 'hieu_bo_tv', name: 'Thư viện', lat: 21.0375, lng: 105.7827 },
-    { key: 'nha_k1', zone: 'nha_k_v', name: 'Nhà K1', lat: 21.0381, lng: 105.7836 },
-    { key: 'nha_v', zone: 'nha_k_v', name: 'Nhà V', lat: 21.0384, lng: 105.7842 },
-    { key: 'nha_c', zone: 'nha_b_c_d', name: 'Nhà C', lat: 21.0377, lng: 105.7845 },
-    { key: 'nha_b', zone: 'nha_b_c_d', name: 'Nhà B', lat: 21.0374, lng: 105.7840 },
-    { key: 'nha_d1', zone: 'nha_b_c_d', name: 'Nhà D1', lat: 21.0368, lng: 105.7843 },
-    { key: 'nha_d2', zone: 'nha_b_c_d', name: 'Nhà D2', lat: 21.0366, lng: 105.7847 },
-    { key: 'nha_d3', zone: 'nha_b_c_d', name: 'Nhà D3', lat: 21.0364, lng: 105.7851 },
-    { key: 'nha_d4', zone: 'nha_b_c_d', name: 'Nhà D4', lat: 21.0362, lng: 105.7855 },
-    { key: 'toa_123_xuan_thuy', zone: 'xuan_thuy_123', name: 'Tòa 123 Xuân Thủy', lat: 21.0361, lng: 105.7825 },
-    { key: 'san_van_dong', zone: 'svd', name: 'Sân vận động', lat: 21.0386, lng: 105.7852 }
+    // KHU HÀNH CHÍNH
+    { value: 'Nhà hiệu bộ', zone: 'hanh_chinh', zoneLabel: 'Khu Hành chính', detail: 'Nhà hiệu bộ', lat: 21.0372, lng: 105.7834 },
+    { value: 'Trung tâm thông tin thư viện', zone: 'hanh_chinh', zoneLabel: 'Khu Hành chính', detail: 'Trung tâm thông tin thư viện', lat: 21.0375, lng: 105.7827 },
+    { value: 'Hội trường 11.10', zone: 'hanh_chinh', zoneLabel: 'Khu Hành chính', detail: 'Hội trường 11.10', lat: 21.0370, lng: 105.7831 },
+
+    // KHU GIẢNG ĐƯỜNG
+    { value: 'Nhà A2', zone: 'giang_duong', zoneLabel: 'Khu Giảng đường', detail: 'A2: Giảng đường, phòng thí nghiệm khoa Hoá, Sinh, Sư phạm Kỹ Thuật', lat: 21.0381, lng: 105.7829 },
+    { value: 'Nhà A3', zone: 'giang_duong', zoneLabel: 'Khu Giảng đường', detail: 'A3: Khoa Sinh Học, phòng thí nghiệm khoa Hoá', lat: 21.0383, lng: 105.7825 },
+    { value: 'Nhà A4', zone: 'giang_duong', zoneLabel: 'Khu Giảng đường', detail: 'A4: Khoa Lý luận Chính trị - Giáo dục Công dân, khoa Hoá', lat: 21.0385, lng: 105.7821 },
+    { value: 'Nhà B1', zone: 'giang_duong', zoneLabel: 'Khu Giảng đường', detail: 'B1: Hội trường', lat: 21.0376, lng: 105.7838 },
+    { value: 'Nhà B2', zone: 'giang_duong', zoneLabel: 'Khu Giảng đường', detail: 'B2: Khoa Ngữ Văn, khoa Lịch Sử, khoa Triết Học', lat: 21.0374, lng: 105.7840 },
+    { value: 'Nhà C', zone: 'giang_duong', zoneLabel: 'Khu Giảng đường', detail: 'C: Khoa Toán - Tin, khoa Công nghệ thông tin, khoa Vật lý', lat: 21.0377, lng: 105.7845 },
+    { value: 'Nhà D3', zone: 'giang_duong', zoneLabel: 'Khu Giảng đường', detail: 'D3: Khoa Tiếng Anh, khoa Việt Nam Học, khoa Quản lý Giáo dục, khoa Công Tác Xã Hội, khoa Ngôn ngữ và Văn hoá Trung Quốc, khoa Nghệ Thuật, bảo tàng sinh vật', lat: 21.0365, lng: 105.7850 },
+    { value: 'Nhà D1, D2, D4', zone: 'giang_duong', zoneLabel: 'Khu Giảng đường', detail: 'D1, D2, D4: Trường THPT Chuyên Sư Phạm', lat: 21.0367, lng: 105.7846 },
+    { value: 'Nhà H8', zone: 'giang_duong', zoneLabel: 'Khu Giảng đường', detail: 'H8: Nhà công vụ cho cán bộ nước ngoài', lat: 21.0388, lng: 105.7832 },
+    { value: 'Nhà M1, M2, M3, M4', zone: 'giang_duong', zoneLabel: 'Khu Giảng đường', detail: 'M1, M2, M3, M4: Trường THCS, THPT Nguyễn Tất Thành', lat: 21.0359, lng: 105.7833 },
+    { value: 'Nhà N', zone: 'giang_duong', zoneLabel: 'Khu Giảng đường', detail: 'N: Nhà xuất bản Đại học Sư phạm Hà Nội, trung tâm nghiên cứu và sản xuất học liệu, trung Tâm Phát Triển Giáo Dục và Công Nghệ Số', lat: 21.0363, lng: 105.7837 },
+    { value: 'Nhà K1', zone: 'giang_duong', zoneLabel: 'Khu Giảng đường', detail: 'K1: Giảng đường, các trung tâm nghiên cứu khoa học công nghệ và quan hệ quốc tế', lat: 21.0381, lng: 105.7836 },
+    { value: 'Nhà K2', zone: 'giang_duong', zoneLabel: 'Khu Giảng đường', detail: 'K2: Nhà trẻ Búp Sen Xanh', lat: 21.0383, lng: 105.7839 },
+    { value: 'Nhà K3', zone: 'giang_duong', zoneLabel: 'Khu Giảng đường', detail: 'K3: Trung tâm giáo dục đặc biệt', lat: 21.0385, lng: 105.7841 },
+    { value: 'Nhà KT', zone: 'giang_duong', zoneLabel: 'Khu Giảng đường', detail: 'KT: Tiểu học Nguyễn Tất Thành', lat: 21.0360, lng: 105.7829 },
+    { value: 'Nhà luyện tập và thi đấu thể dục thể thao', zone: 'giang_duong', zoneLabel: 'Khu Giảng đường', detail: 'Nhà luyện tập và thi đấu thể dục thể thao', lat: 21.0389, lng: 105.7848 },
+    { value: 'Khoa Giáo dục Thể chất', zone: 'giang_duong', zoneLabel: 'Khu Giảng đường', detail: 'Khoa Giáo dục Thể chất', lat: 21.0387, lng: 105.7846 },
+    { value: 'Nhà V', zone: 'giang_duong', zoneLabel: 'Khu Giảng đường', detail: 'V: Giảng đường, khoa Giáo dục Thể chất, khoa Giáo dục Đặc biệt, khoa Giáo dục Tiểu học, khoa Sư phạm Kỹ thuật, khoa Giáo dục Mầm non, khoa Giáo dục Quốc phòng và An ninh, khoa Địa lý, khoa Tâm lý Giáo dục, Viện Nghiên cứu Sư phạm, phòng làm việc giáo sư, bộ môn Tiếng Nga, khoa Tiếng Pháp', lat: 21.0384, lng: 105.7843 },
+
+    // KHU KÝ TÚC XÁ
+    { value: 'Nhà A5 (Ký túc xá)', zone: 'ky_tuc_xa', zoneLabel: 'Khu Ký túc xá', detail: 'A5: Ký túc xá', lat: 21.0391, lng: 105.7817 },
+    { value: 'Nhà A6 (Ký túc xá)', zone: 'ky_tuc_xa', zoneLabel: 'Khu Ký túc xá', detail: 'A6: Ký túc xá', lat: 21.0393, lng: 105.7819 },
+    { value: 'Nhà A8 (Ký túc xá, phòng y tế)', zone: 'ky_tuc_xa', zoneLabel: 'Khu Ký túc xá', detail: 'A8: Ký túc xá, phòng y tế', lat: 21.0395, lng: 105.7821 },
+    { value: 'Nhà A9 (Ký túc xá)', zone: 'ky_tuc_xa', zoneLabel: 'Khu Ký túc xá', detail: 'A9: Ký túc xá', lat: 21.0397, lng: 105.7823 },
+    { value: 'Nhà A10 (Căng tin)', zone: 'ky_tuc_xa', zoneLabel: 'Khu Ký túc xá', detail: 'A10: Căng tin', lat: 21.0394, lng: 105.7825 },
+    { value: 'Nhà A11 (Ký túc xá)', zone: 'ky_tuc_xa', zoneLabel: 'Khu Ký túc xá', detail: 'A11: Ký túc xá', lat: 21.0399, lng: 105.7824 },
+    { value: 'Nhà A12 (Ký túc xá)', zone: 'ky_tuc_xa', zoneLabel: 'Khu Ký túc xá', detail: 'A12: Ký túc xá', lat: 21.0401, lng: 105.7827 },
+
+    // CÁC KHU VỰC KHÁC
+    { value: 'Chùa Thánh Chúa', zone: 'khu_vuc_khac', zoneLabel: 'Các khu vực khác', detail: 'Chùa Thánh Chúa', lat: 21.0379, lng: 105.7816 },
+    { value: 'Vườn thực nghiệm', zone: 'khu_vuc_khac', zoneLabel: 'Các khu vực khác', detail: 'Vườn thực nghiệm', lat: 21.0392, lng: 105.7836 },
+    { value: 'Con đường tình yêu', zone: 'khu_vuc_khac', zoneLabel: 'Các khu vực khác', detail: 'Con đường tình yêu', lat: 21.0378, lng: 105.7832 },
+    { value: 'Sân đa năng', zone: 'khu_vuc_khac', zoneLabel: 'Các khu vực khác', detail: 'Sân đa năng', lat: 21.0385, lng: 105.7850 },
+    { value: 'Sân vận động', zone: 'khu_vuc_khac', zoneLabel: 'Các khu vực khác', detail: 'Sân vận động', lat: 21.0386, lng: 105.7854 }
   ];
 
-  // 2. State người dùng hiện tại (100% đồng bộ từ Firebase)
+  // 2. State người dùng hiện tại (100% từ cơ sở dữ liệu)
   let currentUser = null;
   let userProfile = {
     uid: '',
     name: '',
     email: '',
     studentId: '',
-    faculty: 'Khoa CNTT',
+    faculty: 'Khoa Công nghệ thông tin',
     points: 0,
     helps: 0,
     history: []
@@ -60,7 +81,7 @@
   const allUsersMap = {};
   let globalStats = {
     totalHelps: 0,
-    areas: { ktx: 0, nha_k_v: 0, hieu_bo_tv: 0, nha_b_c_d: 0, xuan_thuy_123: 0, svd: 0 },
+    areas: { hanh_chinh: 0, giang_duong: 0, ky_tuc_xa: 0, khu_vuc_khac: 0 },
     faculties: {}
   };
 
@@ -77,7 +98,7 @@
     toastTimer = setTimeout(() => mobileToast.classList.remove('show'), 3800);
   }
 
-  // 4. Xử lý Đăng nhập / Tạo tài khoản Gmail sinh viên (Firebase Auth)
+  // 4. Xác thực tài khoản (Firebase Auth)
   const authGateOverlay = document.getElementById('authGateOverlay');
   const authTabLogin = document.getElementById('authTabLogin');
   const authTabRegister = document.getElementById('authTabRegister');
@@ -97,16 +118,16 @@
   function mapFirebaseAuthError(err) {
     const code = err && err.code ? err.code : '';
     if (code === 'auth/email-already-in-use') return 'Email này đã được đăng ký. Hãy chuyển sang tab Đăng nhập.';
-    if (code === 'auth/invalid-email') return 'Địa chỉ Email / Gmail không hợp lệ.';
+    if (code === 'auth/invalid-email') return 'Địa chỉ email không hợp lệ.';
     if (code === 'auth/weak-password') return 'Mật khẩu cần có ít nhất 6 ký tự.';
     if (code === 'auth/user-not-found' || code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
       return 'Email hoặc mật khẩu chưa chính xác.';
     }
     if (code === 'auth/operation-not-allowed') {
-      return 'Bạn chưa bật phương thức đăng nhập này trong Firebase Console -> Authentication.';
+      return 'Chưa bật phương thức đăng nhập này trong Firebase Authentication.';
     }
     if (code === 'auth/unauthorized-domain') {
-      return 'Tên miền chưa được cấp quyền trong Firebase Authentication -> Authorized domains.';
+      return 'Tên miền chưa được thêm vào Authorized domains trong Firebase.';
     }
     return 'Lỗi xác thực: ' + (err.message || 'Vui lòng thử lại.');
   }
@@ -127,7 +148,6 @@
     showAuthError('');
   });
 
-  // Đăng ký tài khoản mới
   document.getElementById('btnEmailRegister').addEventListener('click', async () => {
     const name = document.getElementById('regNameInput').value.trim();
     const studentId = document.getElementById('regStudentIdInput').value.trim();
@@ -135,8 +155,8 @@
     const faculty = document.getElementById('regFacultySelect').value;
     const password = document.getElementById('regPasswordInput').value;
 
-    if (!name) return showAuthError('Vui lòng nhập họ và tên sinh viên.');
-    if (!email || !email.includes('@')) return showAuthError('Vui lòng nhập Gmail hoặc email @hnue.edu.vn hợp lệ.');
+    if (!name) return showAuthError('Vui lòng nhập họ và tên.');
+    if (!email || !email.includes('@')) return showAuthError('Vui lòng nhập địa chỉ email hợp lệ.');
     if (password.length < 6) return showAuthError('Mật khẩu phải từ 6 ký tự trở lên.');
 
     showAuthError('');
@@ -153,13 +173,12 @@
         helps: 0,
         createdAt: firebase.database.ServerValue.TIMESTAMP
       });
-      notify(`🎉 Chào mừng ${name} gia nhập HNUE WarmLink!`);
+      notify(`🎉 Chào mừng ${name} tham gia HNUE WarmLink!`);
     } catch (err) {
       showAuthError(mapFirebaseAuthError(err));
     }
   });
 
-  // Đăng nhập bằng Email / Mật khẩu
   document.getElementById('btnEmailLogin').addEventListener('click', async () => {
     const email = document.getElementById('loginEmailInput').value.trim().toLowerCase();
     const password = document.getElementById('loginPasswordInput').value;
@@ -174,7 +193,6 @@
     }
   });
 
-  // Đăng nhập nhanh bằng Google / Gmail sinh viên
   document.getElementById('btnGoogleLogin').addEventListener('click', async () => {
     showAuthError('');
     try {
@@ -189,7 +207,7 @@
           name: u.displayName || u.email.split('@')[0],
           email: u.email,
           studentId: '',
-          faculty: 'Khoa CNTT',
+          faculty: 'Khoa Công nghệ thông tin',
           points: 0,
           helps: 0,
           createdAt: firebase.database.ServerValue.TIMESTAMP
@@ -201,7 +219,6 @@
     }
   });
 
-  // Lắng nghe trạng thái đăng nhập
   let dbListenersAttached = false;
   auth.onAuthStateChanged(async (user) => {
     currentUser = user;
@@ -216,10 +233,10 @@
     if (!snap.exists()) {
       await userRef.set({
         uid: user.uid,
-        name: user.displayName || (user.email ? user.email.split('@')[0] : 'Sinh viên HNUE'),
+        name: user.displayName || (user.email ? user.email.split('@')[0] : 'Thành viên HNUE'),
         email: user.email || '',
         studentId: '',
-        faculty: 'Khoa CNTT',
+        faculty: 'Khoa Công nghệ thông tin',
         points: 0,
         helps: 0,
         createdAt: firebase.database.ServerValue.TIMESTAMP
@@ -232,9 +249,8 @@
     }
   });
 
-  // 5. Lắng nghe toàn bộ cơ sở dữ liệu Firebase thời gian thực
+  // 5. Đồng bộ Realtime Database
   function attachRealtimeDatabaseListeners(myUid) {
-    // 5.1 Hồ sơ cá nhân người dùng hiện tại
     rtdb.ref('users/' + myUid).on('value', (snap) => {
       const val = snap.val();
       if (!val) return;
@@ -243,10 +259,10 @@
 
       userProfile = {
         uid: myUid,
-        name: val.name || 'Sinh viên HNUE',
+        name: val.name || 'Thành viên HNUE',
         email: val.email || currentUser.email || '',
         studentId: val.studentId || '',
-        faculty: val.faculty || 'Khoa CNTT',
+        faculty: val.faculty || 'Khoa Công nghệ thông tin',
         points: Number(val.points || 0),
         helps: Number(val.helps || 0),
         history: histArray
@@ -254,7 +270,6 @@
       syncAllUserUI();
     });
 
-    // 5.2 Toàn bộ danh sách tài khoản
     rtdb.ref('users').on('value', (snap) => {
       const data = snap.val() || {};
       Object.keys(allUsersMap).forEach((k) => delete allUsersMap[k]);
@@ -262,7 +277,6 @@
       updateDbAdminPanel();
     });
 
-    // 5.3 Các tình nguyện viên "Người Thắp Lửa" đang bật GPS
     rtdb.ref('beacons').on('value', (snap) => {
       const data = snap.val() || {};
       const now = Date.now();
@@ -272,7 +286,7 @@
         if (uid === myUid) return;
         const b = data[uid];
         if (b && typeof b.lat === 'number' && (!b.updatedAt || now - b.updatedAt < 1800000)) {
-          const initials = (b.name || 'SV')
+          const initials = (b.name || 'TV')
             .split(' ')
             .slice(-2)
             .map((w) => w[0] || '')
@@ -283,7 +297,7 @@
             id: uid,
             uid: uid,
             type: 'volunteer',
-            initials: initials || 'SV',
+            initials: initials || 'TV',
             name: b.name,
             faculty: b.faculty || 'HNUE',
             skill: b.isLiveGps ? 'Đang bật GPS trực tuyến' : 'Sẵn sàng hỗ trợ',
@@ -296,10 +310,10 @@
       renderRadarAndNearbyList();
     });
 
-    // 5.4 Các tín hiệu SOS cần giúp đỡ theo thời gian thực
     rtdb.ref('sos_signals').on('value', (snap) => {
       const data = snap.val() || {};
       const now = Date.now();
+      const hadActiveSos = Boolean(myActiveSos);
       Object.keys(remoteSosSignals).forEach((k) => delete remoteSosSignals[k]);
       myActiveSos = null;
 
@@ -319,6 +333,11 @@
         }
       });
 
+      if (hadActiveSos && !myActiveSos) {
+        document.getElementById('showVerifyQrModal').classList.remove('open');
+        notify('✓ Lượt hỗ trợ của bạn đã được xác minh hoàn tất!');
+      }
+
       renderMyActiveSosBanner();
       renderIncomingSosList();
       renderRadarAndNearbyList();
@@ -334,15 +353,11 @@
       }
     });
 
-    // 5.5 Thống kê toàn trường (Bản đồ nhiệt & Bảng xếp hạng Liên chi hội)
     rtdb.ref('stats').on('value', (snap) => {
       const val = snap.val() || {};
       globalStats = {
         totalHelps: Number(val.totalHelps || 0),
-        areas: Object.assign(
-          { ktx: 0, nha_k_v: 0, hieu_bo_tv: 0, nha_b_c_d: 0, xuan_thuy_123: 0, svd: 0 },
-          val.areas || {}
-        ),
+        areas: Object.assign({ hanh_chinh: 0, giang_duong: 0, ky_tuc_xa: 0, khu_vuc_khac: 0 }, val.areas || {}),
         faculties: val.faculties || {}
       };
       renderHeatmapAndLeaderboard();
@@ -350,11 +365,11 @@
     });
   }
 
-  // 6. Định vị GPS thực tế & Công thức Haversine
+  // 6. Định vị GPS & Chọn địa điểm 4 khu vực
   const gpsState = {
     isLive: false,
-    lat: 21.0396,
-    lng: 105.7818,
+    lat: 21.0372,
+    lng: 105.7834,
     accuracy: 12,
     watchId: null,
     beaconOn: false
@@ -399,17 +414,19 @@
     return {
       landmark: best,
       distance: minDist,
-      label: minDist <= 1200 ? `${best.name} (cách ~${minDist}m)` : `Tọa độ GPS (${lat.toFixed(5)}° N, ${lng.toFixed(5)}° E)`
+      label: minDist <= 1200 ? `${best.value} (cách ~${minDist}m)` : `Tọa độ GPS (${lat.toFixed(5)}° N, ${lng.toFixed(5)}° E)`
     };
   }
 
-  // Khi người dùng chọn trực tiếp tòa nhà trong danh sách, cập nhật ngay vị trí hiển thị
   const hnueAreaSelect = document.getElementById('hnueAreaSelect');
-  hnueAreaSelect.addEventListener('change', () => {
-    const chosenName = hnueAreaSelect.value;
-    const found = HNUE_LANDMARKS.find((lm) => lm.name === chosenName);
+  const selectedAreaDetailText = document.getElementById('selectedAreaDetailText');
+
+  function updateAreaDetailNote() {
+    const chosenVal = hnueAreaSelect.value;
+    const found = HNUE_LANDMARKS.find((lm) => lm.value === chosenVal);
     if (found) {
-      document.getElementById('gpsDetectedPlace1').textContent = `📍 Khu vực đã chọn: ${found.name}`;
+      selectedAreaDetailText.textContent = `${found.zoneLabel} • ${found.detail}`;
+      document.getElementById('gpsDetectedPlace1').textContent = `📍 Khu vực: ${found.value}`;
       if (!gpsState.isLive) {
         gpsState.lat = found.lat;
         gpsState.lng = found.lng;
@@ -417,9 +434,14 @@
       }
     } else if (gpsState.isLive) {
       const detected = detectNearestHnueLandmark(gpsState.lat, gpsState.lng);
+      selectedAreaDetailText.textContent = `Định vị GPS vệ tinh • Gần nhất: ${detected.landmark.detail}`;
       document.getElementById('gpsDetectedPlace1').textContent = `📍 ${detected.label}`;
+    } else {
+      selectedAreaDetailText.textContent = 'Bấm "Bật GPS thật" để lấy tọa độ vị trí hiện tại của bạn';
     }
-  });
+  }
+
+  hnueAreaSelect.addEventListener('change', updateAreaDetailNote);
 
   function syncMyBeaconToFirebase() {
     if (!currentUser) return;
@@ -483,7 +505,7 @@
       notify('⚠ Trình duyệt không hỗ trợ định vị GPS.');
       return;
     }
-    notify('📡 Đang lấy tọa độ vệ tinh GPS của bạn...');
+    notify('📡 Đang lấy tọa độ GPS của bạn...');
     if (gpsState.watchId !== null) {
       navigator.geolocation.clearWatch(gpsState.watchId);
     }
@@ -495,6 +517,7 @@
         gpsState.lng = pos.coords.longitude;
         gpsState.accuracy = pos.coords.accuracy || 15;
         hnueAreaSelect.value = 'Vị trí GPS thực tế hiện tại của bạn';
+        updateAreaDetailNote();
         updateGpsDisplays();
         if (firstTime) notify('✓ Đã khóa tọa độ GPS thực tế!');
       },
@@ -503,8 +526,8 @@
         updateGpsDisplays();
         notify(
           err.code === 1
-            ? '⚠ Bạn cần cho phép quyền Vị trí (Location) trên trình duyệt để tìm người xung quanh.'
-            : '⚠ Không lấy được tín hiệu GPS. Hãy bật Vị trí trên điện thoại.'
+            ? '⚠ Hãy cấp quyền Vị trí (Location) cho trình duyệt để định vị chính xác.'
+            : '⚠ Không lấy được tín hiệu GPS. Hãy bật Vị trí trên thiết bị.'
         );
       },
       { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
@@ -526,12 +549,16 @@
     syncMyBeaconToFirebase();
     notify(
       gpsState.beaconOn
-        ? '🔥 Đã bật “Người Thắp Lửa”! Vị trí của bạn đang hiển thị trên Radar cộng đồng.'
+        ? '🔥 Đã bật “Người Thắp Lửa”! Vị trí của bạn đang hiển thị trên Radar.'
         : 'Đã tắt chế độ Người Thắp Lửa.'
     );
   });
 
-  // 7. Quản lý tín hiệu SOS của chính mình & Hoàn tất xác nhận cộng điểm thật
+  // 7. Quy trình Mã QR / Mã PIN 4 số xác minh hỗ trợ
+  const showVerifyQrModal = document.getElementById('showVerifyQrModal');
+  const sosVerifyQrHolder = document.getElementById('sosVerifyQrHolder');
+  const sosVerifyPinText = document.getElementById('sosVerifyPinText');
+
   function renderMyActiveSosBanner() {
     const banner = document.getElementById('myActiveSosBanner');
     if (!myActiveSos) {
@@ -554,59 +581,179 @@
     textEl.textContent = `[${myActiveSos.group} • ${myActiveSos.area}] ${myActiveSos.message}`;
   }
 
+  document.getElementById('showVerifyQrBtn').addEventListener('click', () => {
+    if (!myActiveSos) return;
+    const pin = String(myActiveSos.verifyPin || '1234');
+    const qrPayload = `HNUEWL:${myActiveSos.uid}:${pin}`;
+    renderQrSvgInto(sosVerifyQrHolder, qrPayload, 185);
+    sosVerifyPinText.textContent = pin;
+    showVerifyQrModal.classList.add('open');
+  });
+
+  document.getElementById('closeShowVerifyQrBtn').addEventListener('click', () => {
+    showVerifyQrModal.classList.remove('open');
+  });
+
   document.getElementById('cancelMySosBtn').addEventListener('click', async () => {
     if (!currentUser) return;
     await rtdb.ref('sos_signals/' + currentUser.uid).remove();
     notify('Đã hủy tín hiệu SOS của bạn.');
   });
 
-  document.getElementById('confirmSosHelpedBtn').addEventListener('click', async () => {
-    if (!currentUser || !myActiveSos) return;
-    const helperUid = myActiveSos.helperUid;
-    const helperName = myActiveSos.helperName || 'Tình nguyện viên HNUE';
-    const zoneKey = myActiveSos.zoneKey || 'ktx';
-    const nowStr = new Date().toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' });
-    const verifyCode = 'QR-' + Math.floor(1000 + Math.random() * 9000);
+  // Modal Quét QR / Nhập mã 4 số dành cho Người hỗ trợ
+  const scanVerifyQrModal = document.getElementById('scanVerifyQrModal');
+  const qrScannerVideo = document.getElementById('qrScannerVideo');
+  const cameraScanStatus = document.getElementById('cameraScanStatus');
+  const manualVerifyPinInput = document.getElementById('manualVerifyPinInput');
+  let activeVerifyTargetSos = null;
+  let cameraStream = null;
+  let scanIntervalId = null;
 
-    // 1. Cộng +25 Điểm Ấm cho người đã hỗ trợ
-    if (helperUid && allUsersMap[helperUid]) {
-      const hUser = allUsersMap[helperUid];
-      await rtdb.ref('users/' + helperUid).update({
-        points: Number(hUser.points || 0) + 25,
-        helps: Number(hUser.helps || 0) + 1
-      });
-      await rtdb.ref('users/' + helperUid + '/history').push({
-        title: `Hỗ trợ tại ${myActiveSos.area}`,
-        partner: `${userProfile.name} (${userProfile.faculty})`,
-        time: nowStr,
-        code: verifyCode,
-        pointsEarned: 25,
-        timestamp: firebase.database.ServerValue.TIMESTAMP
-      });
+  function stopVerifyCamera() {
+    if (scanIntervalId) {
+      clearInterval(scanIntervalId);
+      scanIntervalId = null;
+    }
+    if (cameraStream) {
+      cameraStream.getTracks().forEach((t) => t.stop());
+      cameraStream = null;
+    }
+    qrScannerVideo.srcObject = null;
+  }
 
-      const hFac = hUser.faculty || 'Khoa CNTT';
-      await rtdb.ref('stats/faculties/' + hFac).set(Number((globalStats.faculties && globalStats.faculties[hFac]) || 0) + 25);
+  async function startVerifyCamera() {
+    manualVerifyPinInput.value = '';
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      cameraScanStatus.textContent = 'Thiết bị không hỗ trợ camera trực tiếp. Hãy nhập mã 4 số bên dưới.';
+      return;
+    }
+    try {
+      cameraStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' }
+      });
+      qrScannerVideo.srcObject = cameraStream;
+      await qrScannerVideo.play();
+
+      if ('BarcodeDetector' in window) {
+        cameraScanStatus.textContent = '📷 Đang quét mã QR trên màn hình người được giúp...';
+        const detector = new window.BarcodeDetector({ formats: ['qr_code'] });
+        scanIntervalId = setInterval(async () => {
+          if (!activeVerifyTargetSos || qrScannerVideo.readyState < 2) return;
+          try {
+            const codes = await detector.detect(qrScannerVideo);
+            if (codes && codes.length > 0) {
+              const raw = (codes[0].rawValue || '').trim();
+              if (raw.startsWith('HNUEWL:')) {
+                const parts = raw.split(':');
+                const scannedPin = parts[2] || '';
+                if (scannedPin) {
+                  manualVerifyPinInput.value = scannedPin;
+                  await verifyAndCompleteSos(scannedPin);
+                }
+              }
+            }
+          } catch (e) {}
+        }, 500);
+      } else {
+        cameraScanStatus.textContent = 'Trình duyệt chưa hỗ trợ tự động đọc QR — hãy nhập nhanh mã 4 số bên dưới.';
+      }
+    } catch (err) {
+      cameraScanStatus.textContent = 'Chưa mở được camera. Bạn có thể nhập trực tiếp mã 4 số bên dưới.';
+    }
+  }
+
+  function openScanVerifyModal(sos) {
+    activeVerifyTargetSos = sos;
+    document.getElementById('scanVerifyTargetDesc').textContent =
+      `Quét mã QR hoặc nhập mã 4 số từ ${sos.name} để xác nhận hoàn tất`;
+    scanVerifyQrModal.classList.add('open');
+    startVerifyCamera();
+  }
+
+  document.getElementById('closeScanVerifyQrBtn').addEventListener('click', () => {
+    stopVerifyCamera();
+    activeVerifyTargetSos = null;
+    scanVerifyQrModal.classList.remove('open');
+  });
+
+  async function verifyAndCompleteSos(enteredCode) {
+    if (!currentUser || !activeVerifyTargetSos) return;
+    const cleanPin = String(enteredCode || '').trim();
+    if (cleanPin.length !== 4) {
+      notify('⚠ Vui lòng nhập đủ 4 chữ số xác nhận.');
+      return;
     }
 
-    // 2. Ghi lịch sử cho người nhận hỗ trợ & cập nhật bản đồ nhiệt
+    // Kiểm tra dữ liệu mới nhất trên Firebase
+    const sosSnap = await rtdb.ref('sos_signals/' + activeVerifyTargetSos.uid).once('value');
+    const liveSos = sosSnap.val();
+    if (!liveSos) {
+      stopVerifyCamera();
+      scanVerifyQrModal.classList.remove('open');
+      notify('Tín hiệu hỗ trợ này đã được đóng trước đó.');
+      return;
+    }
+
+    if (String(liveSos.verifyPin) !== cleanPin) {
+      notify('❌ Mã xác nhận không khớp! Hãy kiểm tra lại mã trên máy người được giúp.');
+      return;
+    }
+
+    // Mã chính xác -> Ghi nhận hoàn thành cho cả hai bên
+    stopVerifyCamera();
+    scanVerifyQrModal.classList.remove('open');
+
+    const nowStr = new Date().toLocaleString('vi-VN', {
+      hour: '2-digit',
+      minute: '2-digit',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+    const receiptCode = 'QR-' + cleanPin;
+
+    // 1. Cộng +25 Điểm Ấm & +1 lượt hỗ trợ cho người giúp
+    await rtdb.ref('users/' + currentUser.uid).update({
+      points: Number(userProfile.points || 0) + 25,
+      helps: Number(userProfile.helps || 0) + 1
+    });
     await rtdb.ref('users/' + currentUser.uid + '/history').push({
-      title: `Được hỗ trợ tại ${myActiveSos.area}`,
-      partner: helperName,
+      title: `Hỗ trợ tại ${liveSos.area}`,
+      partner: `${liveSos.name} (${liveSos.faculty || 'HNUE'})`,
       time: nowStr,
-      code: verifyCode,
+      code: receiptCode,
+      pointsEarned: 25,
+      timestamp: firebase.database.ServerValue.TIMESTAMP
+    });
+
+    // 2. Ghi lịch sử cho người được giúp
+    await rtdb.ref('users/' + liveSos.uid + '/history').push({
+      title: `Được hỗ trợ tại ${liveSos.area}`,
+      partner: `${userProfile.name} (${userProfile.faculty})`,
+      time: nowStr,
+      code: receiptCode,
       pointsEarned: 0,
       timestamp: firebase.database.ServerValue.TIMESTAMP
     });
 
+    // 3. Cập nhật thống kê bản đồ nhiệt 4 khu vực & bảng xếp hạng Khoa
+    const zoneKey = liveSos.zoneKey || 'giang_duong';
+    const myFac = userProfile.faculty || 'Khoa Công nghệ thông tin';
     await rtdb.ref('stats/totalHelps').set(Number(globalStats.totalHelps || 0) + 1);
     await rtdb.ref('stats/areas/' + zoneKey).set(Number((globalStats.areas && globalStats.areas[zoneKey]) || 0) + 1);
+    await rtdb.ref('stats/faculties/' + myFac).set(Number((globalStats.faculties && globalStats.faculties[myFac]) || 0) + 25);
 
-    // 3. Đóng tín hiệu SOS
-    await rtdb.ref('sos_signals/' + currentUser.uid).remove();
-    notify(`🎉 Đã xác nhận hoàn thành hỗ trợ! ${helperUid ? `Đã cộng +25 Điểm Ấm cho ${helperName}.` : ''}`);
+    // 4. Xóa tín hiệu SOS đã hoàn thành
+    await rtdb.ref('sos_signals/' + liveSos.uid).remove();
+    activeVerifyTargetSos = null;
+    notify('🎉 Xác minh QR thành công! Bạn đã nhận +25 Điểm Ấm.');
+  }
+
+  document.getElementById('submitVerifyPinBtn').addEventListener('click', () => {
+    verifyAndCompleteSos(manualVerifyPinInput.value);
   });
 
-  // 8. Hiển thị danh sách người cần giúp đỡ thật từ Firebase
+  // 8. Hiển thị danh sách người cần hỗ trợ trên Radar GPS
   function renderIncomingSosList() {
     const container = document.getElementById('incomingSosContainer');
     const list = Object.values(remoteSosSignals)
@@ -623,8 +770,9 @@
     }
 
     container.innerHTML = list
-      .map(
-        (sos) => `
+      .map((sos) => {
+        const isAcceptedByMe = currentUser && sos.helperUid === currentUser.uid;
+        return `
         <div class="vol-card" style="border-color: #f43f5e; background: #fff1f2;">
           <div class="vol-card-top">
             <div>
@@ -635,14 +783,21 @@
             </div>
             <span class="vol-dist-tag" style="background: #fff; color: #e11d48; font-size: 0.84rem;">${sos.distM}m</span>
           </div>
-          <div class="vol-card-actions" style="grid-template-columns: 1fr;">
-            <button type="button" class="btn-confirm-qr" data-accept-sos-uid="${sos.uid}" style="font-size: 0.88rem; padding: 10px;">
-              ${sos.helperUid === currentUser.uid ? '💬 Tiếp tục nhắn tin hỗ trợ' : '🤝 Tiếp nhận hỗ trợ & Nhắn tin ngay'}
+          <div class="vol-card-actions" style="grid-template-columns: ${isAcceptedByMe ? '1fr 1.35fr' : '1fr'};">
+            <button type="button" class="btn-chat-vol" data-accept-sos-uid="${sos.uid}" style="font-size: 0.86rem; padding: 10px;">
+              ${isAcceptedByMe ? '💬 Nhắn tin' : '🤝 Tiếp nhận & Nhắn tin'}
             </button>
+            ${
+              isAcceptedByMe
+                ? `<button type="button" class="btn-confirm-qr" data-verify-sos-uid="${sos.uid}" style="font-size: 0.86rem; padding: 10px;">
+                    📷 Quét / Nhập mã xong
+                  </button>`
+                : ''
+            }
           </div>
         </div>
-      `
-      )
+      `;
+      })
       .join('');
 
     container.querySelectorAll('[data-accept-sos-uid]').forEach((btn) => {
@@ -663,6 +818,14 @@
           distM: sos.distM,
           dirText: sos.dirText
         });
+      });
+    });
+
+    container.querySelectorAll('[data-verify-sos-uid]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const sosUid = btn.getAttribute('data-verify-sos-uid');
+        const sos = list.find((x) => x.uid === sosUid);
+        if (sos) openScanVerifyModal(sos);
       });
     });
   }
@@ -742,8 +905,7 @@
     if (!volunteersOnly.length) {
       listContainer.innerHTML = `
         <div class="ui-card" style="text-align: center; font-size: 0.86rem; color: #475569; line-height: 1.55;">
-          Hiện chưa có “Người Thắp Lửa” nào khác đang bật GPS trong phạm vi này.<br/>
-          <em>Mẹo: Mở link web trên điện thoại thứ 2, tạo tài khoản và bật công tắc “Người Thắp Lửa” để thấy kết nối ngay!</em>
+          Hiện chưa có “Người Thắp Lửa” nào khác đang trực tuyến trong phạm vi này.
         </div>
       `;
     } else {
@@ -781,7 +943,6 @@
     });
   }
 
-  // Chuyển đổi Radar / Bản đồ GPS
   const modeRadarBtn = document.getElementById('modeRadarBtn');
   const modeGpsMapBtn = document.getElementById('modeGpsMapBtn');
   const radarViewPanel = document.getElementById('radarViewPanel');
@@ -810,7 +971,7 @@
     });
   });
 
-  // 10. Đồng bộ giao diện Hồ sơ, Điểm Ấm, Chứng nhận & Bản đồ nhiệt
+  // 10. Đồng bộ giao diện Hồ sơ, Điểm Ấm, Chứng nhận & Bản đồ nhiệt 4 khu vực
   function syncAllUserUI() {
     const isHnue = userProfile.email.toLowerCase().endsWith('@hnue.edu.vn');
     document.getElementById('headerVerifiedBadge').textContent = isHnue ? '✓ @hnue.edu.vn' : '✓ Đã xác thực';
@@ -838,8 +999,8 @@
     document.getElementById('sv5tProgressBar').style.width = pct + '%';
     document.getElementById('sv5tProgressNote').textContent =
       userProfile.points >= 200
-        ? '★ Đã đạt chuẩn tiêu chí “Đạo đức tốt” – Sinh viên 5 tốt cấp Trường!'
-        : `Còn ${200 - userProfile.points} Điểm Ấm để đạt chuẩn tiêu chí “Đạo đức tốt” cấp Trường`;
+        ? '★ Đã đạt mốc Người Thắp Lửa Tiêu Biểu cấp Trường!'
+        : `Còn ${200 - userProfile.points} Điểm Ấm để đạt mốc ghi nhận tiêu biểu`;
 
     const histEl = document.getElementById('verifiedHistoryList');
     if (!userProfile.history.length) {
@@ -865,17 +1026,15 @@
 
   function renderHeatmapAndLeaderboard() {
     document.getElementById('weeklySparksCount').textContent = globalStats.totalHelps;
-    document.getElementById('ktxSparkCounter').textContent = `${globalStats.areas.ktx || 0} đốm lửa`;
-    document.getElementById('nhaKVSparkCounter').textContent = `${globalStats.areas.nha_k_v || 0} đốm lửa`;
-    document.getElementById('hieuBoTvSparkCounter').textContent = `${globalStats.areas.hieu_bo_tv || 0} đốm lửa`;
-    document.getElementById('nhaBCDSparkCounter').textContent = `${globalStats.areas.nha_b_c_d || 0} đốm lửa`;
-    document.getElementById('xuanThuySparkCounter').textContent = `${globalStats.areas.xuan_thuy_123 || 0} đốm lửa`;
-    document.getElementById('svdSparkCounter').textContent = `${globalStats.areas.svd || 0} đốm lửa`;
+    document.getElementById('zoneHanhChinhCounter').textContent = `${globalStats.areas.hanh_chinh || 0} đốm lửa`;
+    document.getElementById('zoneGiangDuongCounter').textContent = `${globalStats.areas.giang_duong || 0} đốm lửa`;
+    document.getElementById('zoneKtxCounter').textContent = `${globalStats.areas.ky_tuc_xa || 0} đốm lửa`;
+    document.getElementById('zoneKhacCounter').textContent = `${globalStats.areas.khu_vuc_khac || 0} đốm lửa`;
 
     const lbEl = document.getElementById('facultyLeaderboardList');
     const entries = Object.entries(globalStats.faculties || {}).sort((a, b) => b[1] - a[1]);
     if (!entries.length) {
-      lbEl.innerHTML = `<div style="font-size: 0.84rem; color: #475569;">Chưa có dữ liệu điểm tích lũy theo Khoa. Bảng xếp hạng sẽ tự động cập nhật khi có lượt hỗ trợ hoàn tất.</div>`;
+      lbEl.innerHTML = `<div style="font-size: 0.84rem; color: #475569;">Chưa có dữ liệu điểm tích lũy theo Khoa / Đơn vị.</div>`;
       return;
     }
     const medals = ['🥇', '🥈', '🥉'];
@@ -916,7 +1075,7 @@
   if (!window.location.hash) history.replaceState(null, '', '#/phat-tin-hieu');
   navigateToRoute(window.location.hash);
 
-  // 12. AI NLP kiểm duyệt & Phát tín hiệu SOS lên Firebase
+  // 12. AI NLP kiểm duyệt & Phát tín hiệu SOS kèm mã xác nhận QR
   let selectedGroup = 'Y tế & Đời sống';
   document.querySelectorAll('#supportGroupPills .support-chip').forEach((chip) => {
     chip.addEventListener('click', () => {
@@ -927,13 +1086,6 @@
   });
 
   const sosMessageInput = document.getElementById('sosMessageInput');
-  document.querySelectorAll('.template-pill[data-tpl]').forEach((tplBtn) => {
-    tplBtn.addEventListener('click', () => {
-      sosMessageInput.value = tplBtn.getAttribute('data-tpl');
-      validateAiNlp();
-    });
-  });
-
   const nlpFeedbackBox = document.getElementById('nlpFeedbackBox');
   const nlpFeedbackText = document.getElementById('nlpFeedbackText');
   const nlpAutoCleanBtn = document.getElementById('nlpAutoCleanBtn');
@@ -955,16 +1107,19 @@
       return false;
     }
     nlpFeedbackBox.classList.remove('is-warning');
-    nlpFeedbackText.textContent = '✓ AI NLP: Nội dung rõ ràng, tích cực & an toàn';
+    nlpFeedbackText.textContent = '✓ AI NLP: Nội dung rõ ràng & an toàn';
     nlpAutoCleanBtn.style.display = 'none';
     return true;
   }
 
   sosMessageInput.addEventListener('input', validateAiNlp);
   nlpAutoCleanBtn.addEventListener('click', () => {
-    sosMessageInput.value = 'Mình đang cần hỗ trợ gấp tại khuôn viên trường, mong nhận được sự giúp đỡ từ bạn đồng môn.';
+    let cleaned = sosMessageInput.value;
+    blockedWords.forEach((w) => {
+      cleaned = cleaned.replace(new RegExp(w, 'gi'), '');
+    });
+    sosMessageInput.value = cleaned.replace(/\s+/g, ' ').trim();
     validateAiNlp();
-    notify('✓ Đã chuẩn hóa nội dung tích cực!');
   });
 
   document.getElementById('triggerSosBtn').addEventListener('click', async () => {
@@ -975,15 +1130,15 @@
     }
 
     const selectedArea = hnueAreaSelect.value;
-    const chosenLandmark = HNUE_LANDMARKS.find((lm) => lm.name === selectedArea);
+    const chosenLandmark = HNUE_LANDMARKS.find((lm) => lm.value === selectedArea);
 
     let targetLat = gpsState.lat;
     let targetLng = gpsState.lng;
     let areaText = selectedArea;
-    let zoneKey = 'ktx';
+    let zoneKey = 'hanh_chinh';
 
     if (chosenLandmark) {
-      areaText = chosenLandmark.name;
+      areaText = chosenLandmark.value;
       zoneKey = chosenLandmark.zone;
       if (!gpsState.isLive) {
         targetLat = chosenLandmark.lat;
@@ -995,6 +1150,8 @@
       zoneKey = detected.landmark.zone;
       if (!gpsState.isLive) activateRealGeolocation();
     }
+
+    const verifyPin = String(Math.floor(1000 + Math.random() * 9000));
 
     const sosRef = rtdb.ref('sos_signals/' + currentUser.uid);
     sosRef.onDisconnect().remove();
@@ -1009,14 +1166,14 @@
       message: sosMessageInput.value.trim(),
       lat: targetLat,
       lng: targetLng,
+      verifyPin: verifyPin,
       helperUid: null,
       helperName: null,
       createdAt: firebase.database.ServerValue.TIMESTAMP
     });
 
     if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
-    notify(`🔥 Đã phát tín hiệu SOS tại ${areaText}!`);
-    window.location.hash = '#/radar-500m';
+    notify(`🔥 Đã phát tín hiệu tại ${areaText}! Bấm "Hiện mã xác nhận" khi được giúp xong.`);
   });
 
   // 13. Chat 2 chiều thời gian thực qua Firebase
@@ -1035,7 +1192,7 @@
     }
 
     document.getElementById('chatPartnerName').textContent = `${peer.name} (${peer.distM}m)`;
-    document.getElementById('chatPartnerMeta').textContent = `✓ ${peer.faculty} • Kết nối thời gian thực`;
+    document.getElementById('chatPartnerMeta').textContent = `✓ ${peer.faculty} • Kết nối trực tiếp`;
     chatMessagesBox.innerHTML = `
       <div class="chat-bubble incoming">
         Kênh trao đổi trực tiếp với ${peer.name} (cách ${peer.distM}m, hướng ${peer.dirText}).
@@ -1076,9 +1233,6 @@
   chatInputBox.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') sendChatMessage(chatInputBox.value);
   });
-  document.querySelectorAll('.chat-quick-btn').forEach((b) => {
-    b.addEventListener('click', () => sendChatMessage(b.textContent));
-  });
   document.getElementById('closeChatModalBtn').addEventListener('click', () => {
     if (activeChatRef) {
       activeChatRef.off();
@@ -1108,7 +1262,7 @@
     await rtdb.ref('users/' + currentUser.uid).update({ name, studentId, faculty });
     syncMyBeaconToFirebase();
     profileModal.classList.remove('open');
-    notify('✓ Đã cập nhật hồ sơ lên cơ sở dữ liệu!');
+    notify('✓ Đã cập nhật hồ sơ thành công!');
   });
 
   document.getElementById('logoutAccountBtn').addEventListener('click', async () => {
@@ -1120,7 +1274,6 @@
     notify('Đã đăng xuất tài khoản.');
   });
 
-  // Bảng kiểm soát CSDL
   const dbControlModal = document.getElementById('dbControlModal');
   function updateDbAdminPanel() {
     document.getElementById('dbStatUsers').textContent = Object.keys(allUsersMap).length;
@@ -1140,7 +1293,7 @@
         <div class="history-item" style="align-items: center;">
           <div>
             <div style="font-weight: 700; font-size: 0.86rem;">${s.name} • ${s.group}</div>
-            <div style="font-size: 0.78rem; color: #475569;">${s.area}</div>
+            <div style="font-size: 0.78rem; color: #475569;">${s.area} • Mã: ${s.verifyPin || '----'}</div>
           </div>
           <button type="button" data-admin-del-sos="${s.uid}" style="border: 1px solid #fecaca; background: #fef2f2; color: #dc2626; font-size: 0.78rem; font-weight: 700; padding: 6px 10px; border-radius: 8px; cursor: pointer;">
             Đóng SOS
@@ -1329,6 +1482,23 @@
     return { createMatrix };
   })();
 
+  function renderQrSvgInto(containerEl, textStr, pxSize) {
+    const matrix = QRGen.createMatrix(textStr);
+    const n = matrix.length;
+    const quiet = 2;
+    const total = n + quiet * 2;
+    let rects = '';
+    for (let r = 0; r < n; r++) {
+      for (let c = 0; c < n; c++) {
+        if (matrix[r][c] === 1) {
+          rects += `<rect x="${c + quiet}" y="${r + quiet}" width="1" height="1" rx="0.18" fill="#0f172a"/>`;
+        }
+      }
+    }
+    containerEl.innerHTML = `<svg width="${pxSize}" height="${pxSize}" viewBox="0 0 ${total} ${total}" xmlns="http://www.w3.org/2000/svg"><rect width="${total}" height="${total}" fill="#ffffff"/>${rects}</svg>`;
+    return matrix;
+  }
+
   const mobileQrHolder = document.getElementById('mobileQrHolder');
   const customMvpLinkInput = document.getElementById('customMvpLinkInput');
   const qrLinkCaption = document.getElementById('qrLinkCaption');
@@ -1342,19 +1512,7 @@
   function drawMobileQr(urlStr) {
     const clean = (urlStr || initialUrl).trim();
     qrLinkCaption.textContent = clean;
-    qrMatrix = QRGen.createMatrix(clean);
-    const n = qrMatrix.length;
-    const quiet = 2;
-    const total = n + quiet * 2;
-    let rects = '';
-    for (let r = 0; r < n; r++) {
-      for (let c = 0; c < n; c++) {
-        if (qrMatrix[r][c] === 1) {
-          rects += `<rect x="${c + quiet}" y="${r + quiet}" width="1" height="1" rx="0.18" fill="#0f172a"/>`;
-        }
-      }
-    }
-    mobileQrHolder.innerHTML = `<svg width="172" height="172" viewBox="0 0 ${total} ${total}" xmlns="http://www.w3.org/2000/svg"><rect width="${total}" height="${total}" fill="#ffffff"/>${rects}</svg>`;
+    qrMatrix = renderQrSvgInto(mobileQrHolder, clean, 172);
   }
   drawMobileQr(customMvpLinkInput.value);
 
@@ -1396,6 +1554,7 @@
     }
   });
 
+  updateAreaDetailNote();
   updateGpsDisplays();
   renderHeatmapAndLeaderboard();
 })();

@@ -1760,3 +1760,12 @@ a {
   #certSheetModal { position: fixed; inset: 0; background: #fff; align-items: center; }
   .no-print { display: none !important; }
 }
+
+.mobile-select {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
