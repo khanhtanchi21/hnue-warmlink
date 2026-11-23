@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>HNUE WarmLink – Cổng Quản Trị &amp; Giám Sát Hệ Thống</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f1f5f9;
+      --surface: #ffffff;
+      --dark: #0f172a;
+      --dark-2: #1e293b;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #475569;
+      --primary: #ea580c;
+      --primary-hover: #c2410c;
+      --emerald: #059669;
+      --rose: #e11d48;
+      --sky: #0284c7;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Màn hình đăng nhập bảo mật */
+    .admin-auth-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: linear-gradient(145deg, #090d16 0%, #0f172a 55%, #27130a 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .admin-auth-screen.hidden { display: none; }
+    .auth-card {
+      width: 100%;
+      max-width: 430px;
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 28px 24px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+    }
+    .shield-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #fef2f2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+      font-size: 0.76rem;
+      font-weight: 800;
+      padding: 5px 12px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+    .auth-card h1 { font-size: 1.35rem; font-weight: 800; color: var(--dark); }
+    .auth-card p { font-size: 0.85rem; color: var(--muted); margin-top: 4px; margin-bottom: 18px; }
+
+    .form-group { margin-bottom: 13px; }
+    .form-group label { display: block; font-size: 0.84rem; font-weight: 700; margin-bottom: 5px; color: #1e293b; }
+    .input-ctrl {
+      width: 100%;
+      padding: 11px 13px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 11px;
+      font-family: inherit;
+      font-size: 0.92rem;
+      outline: none;
+    }
+    .input-ctrl:focus { border-color: var(--primary); }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px 16px;
+      border-radius: 11px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1.5px solid transparent;
+      transition: 0.15s ease;
+    }
+    .btn-full { width: 100%; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-dark { background: var(--dark); color: #fff; }
+    .btn-outline { background: #fff; border-color: #cbd5e1; color: var(--text); }
+    .btn-outline:hover { background: #f8fafc; }
+    .btn-danger { background: #fef2f2; border-color: #fecaca; color: #dc2626; }
+    .btn-danger:hover { background: #fee2e2; }
+    .btn-sm { padding: 6px 11px; font-size: 0.78rem; border-radius: 8px; }
+
+    .alert-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+      padding: 11px 13px;
+      border-radius: 11px;
+      font-size: 0.82rem;
+      margin-bottom: 14px;
+      display: none;
+      line-height: 1.45;
+    }
+    .uid-helper-box {
+      margin-top: 8px;
+      padding: 8px 10px;
+      background: #fff;
+      border: 1px dashed #fca5a5;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.78rem;
+      word-break: break-all;
+      color: #0f172a;
+    }
+
+    /* Bố cục Dashboard chính */
+    .topbar {
+      background: var(--dark);
+      color: #fff;
+      padding: 14px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .topbar-brand { display: flex; align-items: center; gap: 10px; }
+    .topbar-badge {
+      background: var(--primary);
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 3px 9px;
+      border-radius: 6px;
+    }
+    .topbar-title { font-size: 1.05rem; font-weight: 800; }
+    .topbar-right { display: flex; align-items: center; gap: 10px; font-size: 0.82rem; }
+
+    .container { max-width: 1220px; margin: 0 auto; padding: 20px 16px 48px; }
+
+    /* Thanh điều hướng tab */
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      margin-bottom: 18px;
+    }
+    .nav-tab {
+      background: #fff;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.86rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .nav-tab.active {
+      background: var(--dark);
+      color: #fff;
+      border-color: var(--dark);
+    }
+
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    /* KPI Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .kpi-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px 18px;
+    }
+    .kpi-label { font-size: 0.8rem; font-weight: 700; color: var(--muted); }
+    .kpi-val { font-size: 1.75rem; font-weight: 800; margin-top: 4px; color: var(--dark); }
+    .kpi-sub { font-size: 0.76rem; color: var(--muted); margin-top: 2px; }
+
+    /* Card & Table */
+    .panel-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+    .panel-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .panel-title { font-size: 1rem; font-weight: 800; color: var(--dark); }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+    }
+
+    .table-wrap { width: 100%; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    th, td {
+      padding: 11px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    th {
+      background: #f8fafc;
+      font-weight: 700;
+      color: var(--muted);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+    }
+    tr:hover td { background: #f8fafc; }
+
+    .pill {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .pill-green { background: #dcfce7; color: #15803d; }
+    .pill-red { background: #ffe4e6; color: #be123c; }
+    .pill-amber { background: #fef3c7; color: #b45309; }
+    .pill-slate { background: #f1f5f9; color: #334155; }
+
+    .zone-bar-row { margin-bottom: 12px; }
+    .zone-bar-top { display: flex; justify-content: space-between; font-size: 0.84rem; font-weight: 700; margin-bottom: 4px; }
+    .zone-bar-track { height: 9px; background: #e2e8f0; border-radius: 999px; overflow: hidden; }
+    .zone-bar-fill { height: 100%; background: var(--primary); border-radius: 999px; }
+
+    .filter-bar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+    .filter-bar .input-ctrl { max-width: 280px; padding: 9px 12px; font-size: 0.86rem; }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 500;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal-dialog {
+      width: 100%;
+      max-width: 460px;
+      background: #fff;
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--dark);
+      color: #fff;
+      padding: 11px 16px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+      opacity: 0;
+      pointer-events: none;
+      transition: 0.2s ease;
+      z-index: 9999;
+    }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+
+  <!-- CỔNG ĐĂNG NHẬP QUẢN TRỊ VIÊN -->
+  <div class="admin-auth-screen" id="adminAuthScreen">
+    <div class="auth-card">
+      <div class="shield-badge">🛡️ KHU VỰC QUẢN TRỊ BẢO MẬT</div>
+      <h1>HNUE WarmLink Admin</h1>
+      <p>Chỉ tài khoản thuộc Ban điều hành được cấp quyền trên cơ sở dữ liệu mới có thể truy cập.</p>
+
+      <div class="alert-box" id="adminAuthError"></div>
+
+      <div class="form-group">
+        <label for="adminEmail">Email quản trị viên</label>
+        <input type="email" id="adminEmail" class="input-ctrl" placeholder="Nhập email quản trị" />
+      </div>
+      <div class="form-group">
+        <label for="adminPass">Mật khẩu</label>
+        <input type="password" id="adminPass" class="input-ctrl" placeholder="Nhập mật khẩu" />
+      </div>
+      <button type="button" class="btn btn-primary btn-full" id="btnAdminEmailLogin">Đăng nhập Quản trị</button>
+
+      <div style="text-align: center; margin: 12px 0; font-size: 0.78rem; color: #64748b; font-weight: 700;">HOẶC</div>
+
+      <button type="button" class="btn btn-outline btn-full" id="btnAdminGoogleLogin">
+        Đăng nhập bằng Google / Gmail Quản trị
+      </button>
+
+      <div style="margin-top: 16px; text-align: center;">
+        <a href="index.html" style="font-size: 0.8rem; color: #475569; text-decoration: none;">← Quay lại trang người dùng</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- GIAO DIỆN QUẢN TRỊ CHÍNH -->
+  <div id="adminDashboardApp" style="display: none;">
+    <header class="topbar">
+      <div class="topbar-brand">
+        <span class="topbar-badge">ADMIN CONTROL</span>
+        <span class="topbar-title">HNUE WarmLink – Trung Tâm Điều Hành</span>
+      </div>
+      <div class="topbar-right">
+        <span id="adminIdentityLabel" style="color: #cbd5e1;">...</span>
+        <a href="index.html" target="_blank" class="btn btn-outline btn-sm" style="background: #1e293b; color: #fff; border-color: #334155; text-decoration: none;">Mở App Chính</a>
+        <button type="button" class="btn btn-danger btn-sm" id="btnAdminLogout">Đăng xuất</button>
+      </div>
+    </header>
+
+    <div class="container">
+      <!-- Navigation Tabs -->
+      <div class="nav-tabs">
+        <button type="button" class="nav-tab active" data-tab="tab-overview">📊 Tổng quan &amp; Thống kê</button>
+        <button type="button" class="nav-tab" data-tab="tab-live">📡 Giám sát SOS &amp; Trực tuyến</button>
+        <button type="button" class="nav-tab" data-tab="tab-users">👥 Thành viên &amp; Điểm Ấm</button>
+        <button type="button" class="nav-tab" data-tab="tab-security">🛡️ Bảo mật &amp; Nhật ký hệ thống</button>
+      </div>
+
+      <!-- TAB 1: TỔNG QUAN -->
+      <section class="tab-pane active" id="tab-overview">
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">TỔNG THÀNH VIÊN</div>
+            <div class="kpi-val" id="kpiTotalUsers">0</div>
+            <div class="kpi-sub">Tài khoản đã xác thực</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">NGƯỜI THẮP LỬA ONLINE</div>
+            <div class="kpi-val" id="kpiOnlineBeacons" style="color: var(--emerald);">0</div>
+            <div class="kpi-sub">Đang bật định vị sẵn sàng</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">TÍN HIỆU SOS ĐANG MỞ</div>
+            <div class="kpi-val" id="kpiActiveSos" style="color: var(--rose);">0</div>
+            <div class="kpi-sub">Cần theo dõi hỗ trợ</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">LƯỢT HỖ TRỢ ĐÃ XÁC MINH QR</div>
+            <div class="kpi-val" id="kpiVerifiedHelps" style="color: var(--sky);">0</div>
+            <div class="kpi-sub">Tổng lượt hoàn thành toàn trường</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="panel-card">
+            <div class="panel-header">
+              <h2 class="panel-title">Phân bố hỗ trợ theo 4 khu vực HNUE</h2>
+            </div>
+            <div id="overviewZonesBreakdown"></div>
+          </div>
+
+          <div class="panel-card">
+            <div class="panel-header">
+              <h2 class="panel-title">Bảng xếp hạng Khoa / Đơn vị</h2>
+            </div>
+            <div id="overviewFacultyRanking"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: GIÁM SÁT SOS & TRỰC TUYẾN -->
+      <section class="tab-pane" id="tab-live">
+        <div class="panel-card">
+          <div class="panel-header">
+            <h2 class="panel-title">🆘 Danh sách tín hiệu SOS đang hoạt động</h2>
+            <span class="pill pill-red" id="liveSosBadge">0 tín hiệu</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Người phát tín hiệu</th>
+                  <th>Khu vực &amp; Nhóm</th>
+                  <th>Nội dung</th>
+                  <th>Mã PIN QR</th>
+                  <th>Trạng thái tiếp nhận</th>
+                  <th>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="liveSosTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel-card">
+          <div class="panel-header">
+            <h2 class="panel-title">🔥 Người Thắp Lửa đang trực tuyến (Radar GPS)</h2>
+            <span class="pill pill-green" id="liveBeaconsBadge">0 trực tuyến</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Họ và tên</th>
+                  <th>Khoa / Đơn vị</th>
+                  <th>Tọa độ GPS</th>
+                  <th>Chế độ định vị</th>
+                  <th>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="liveBeaconsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: THÀNH VIÊN & ĐIỂM ẤM -->
+      <section class="tab-pane" id="tab-users">
+        <div class="panel-card">
+          <div class="panel-header">
+            <h2 class="panel-title">Danh sách thành viên &amp; Minh chứng Điểm Ấm</h2>
+            <button type="button" class="btn btn-primary btn-sm" id="btnExportCsv">⬇ Xuất báo cáo Excel (.CSV)</button>
+          </div>
+
+          <div class="filter-bar">
+            <input type="text" id="userSearchInput" class="input-ctrl" placeholder="Tìm theo tên, email, mã SV..." />
+            <select id="userFacultyFilter" class="input-ctrl">
+              <option value="">Tất cả Khoa / Đơn vị</option>
+            </select>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Họ và tên</th>
+                  <th>Email / Mã số</th>
+                  <th>Khoa / Đơn vị</th>
+                  <th>Điểm Ấm</th>
+                  <th>Lượt giúp</th>
+                  <th>Quản lý</th>
+                </tr>
+              </thead>
+              <tbody id="usersTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: BẢO MẬT & NHẬT KÝ HỆ THỐNG -->
+      <section class="tab-pane" id="tab-security">
+        <div class="grid-2">
+          <div class="panel-card">
+            <div class="panel-header">
+              <h2 class="panel-title">🔑 Danh sách Tài khoản Quản trị</h2>
+            </div>
+            <p style="font-size: 0.82rem; color: var(--muted); margin-bottom: 12px;">
+              Chỉ các UID dưới đây có quyền ghi dữ liệu quản trị. Để thêm quản trị viên mới, nhập UID tài khoản đã đăng ký trên hệ thống:
+            </p>
+            <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+              <input type="text" id="newAdminUidInput" class="input-ctrl" placeholder="Dán UID của thành viên..." />
+              <button type="button" class="btn btn-dark btn-sm" id="btnGrantAdmin">Cấp quyền</button>
+            </div>
+            <div id="adminAccountsList"></div>
+          </div>
+
+          <div class="panel-card">
+            <div class="panel-header">
+              <h2 class="panel-title">📜 Nhật ký giám sát bất biến (Audit Logs)</h2>
+            </div>
+            <div id="auditLogsList" style="max-height: 360px; overflow-y: auto;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- MODAL ĐIỀU CHỈNH ĐIỂM & XEM LỊCH SỬ THÀNH VIÊN -->
+  <div class="modal-backdrop" id="userDetailModal">
+    <div class="modal-dialog">
+      <h3 style="font-size: 1.08rem; font-weight: 800; margin-bottom: 4px;" id="modalUserName">Chi tiết thành viên</h3>
+      <p style="font-size: 0.82rem; color: var(--muted); margin-bottom: 14px;" id="modalUserMeta">...</p>
+
+      <div class="form-group">
+        <label for="adjustPointsDelta">Điều chỉnh Điểm Ấm (nhập số dương để cộng, số âm để trừ)</label>
+        <input type="number" id="adjustPointsDelta" class="input-ctrl" placeholder="Ví dụ: 25 hoặc -25" />
+      </div>
+      <div class="form-group">
+        <label for="adjustPointsReason">Lý do điều chỉnh (bắt buộc lưu nhật ký)</label>
+        <input type="text" id="adjustPointsReason" class="input-ctrl" placeholder="Nhập lý do xác minh..." />
+      </div>
+
+      <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+        <button type="button" class="btn btn-primary btn-full" id="btnConfirmAdjustPoints">Cập nhật Điểm Ấm</button>
+      </div>
+
+      <div style="font-size: 0.82rem; font-weight: 700; margin-bottom: 6px;">Lịch sử xác minh QR gần đây:</div>
+      <div id="modalUserHistory" style="max-height: 150px; overflow-y: auto; border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; font-size: 0.8rem; margin-bottom: 14px;"></div>
+
+      <button type="button" class="btn btn-outline btn-full" id="btnCloseUserModal">Đóng cửa sổ</button>
+    </div>
+  </div>
+
+  <div class="toast" id="adminToast"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyCV3MdX8zQ1bPpYocMphIDubr_KpZnmnEc",
+        authDomain: "hnue-warmlink.firebaseapp.com",
+        databaseURL: "https://hnue-warmlink-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "hnue-warmlink",
+        storageBucket: "hnue-warmlink.firebasestorage.app",
+        messagingSenderId: "462605682082",
+        appId: "1:462605682082:web:812168b291174b181c1efb",
+        measurementId: "G-ELBFFLS61V"
+      };
+
+      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      const rtdb = firebase.database();
+
+      // Hàm chống XSS khi hiển thị dữ liệu từ người dùng
+      function esc(str) {
+        return String(str ?? '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      const toastEl = document.getElementById('adminToast');
+      let toastTimer = null;
+      function showToast(msg) {
+        toastEl.textContent = msg;
+        toastEl.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toastEl.classList.remove('show'), 3500);
+      }
+
+      // Tự động đăng xuất sau 15 phút không thao tác
+      let idleTimer = null;
+      function resetIdleTimer() {
+        clearTimeout(idleTimer);
+        if (auth.currentUser) {
+          idleTimer = setTimeout(async () => {
+            await writeAuditLog('AUTO_LOCK', 'Tự động đăng xuất do không thao tác trong 15 phút');
+            await auth.signOut();
+            alert('Phiên quản trị đã tự động khóa do không hoạt động.');
+          }, 15 * 60 * 1000);
+        }
+      }
+      ['click', 'keydown', 'mousemove', 'touchstart'].forEach((evt) => {
+        document.addEventListener(evt, resetIdleTimer, { passive: true });
+      });
+
+      // Ghi nhật ký bảo mật bất biến
+      async function writeAuditLog(action, detail) {
+        if (!auth.currentUser) return;
+        try {
+          await rtdb.ref('audit_logs').push({
+            adminUid: auth.currentUser.uid,
+            adminEmail: auth.currentUser.email || '',
+            action: action,
+            detail: detail,
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+          });
+        } catch (e) {}
+      }
+
+      // Xử lý đăng nhập Admin
+      const adminAuthScreen = document.getElementById('adminAuthScreen');
+      const adminDashboardApp = document.getElementById('adminDashboardApp');
+      const adminAuthError = document.getElementById('adminAuthError');
+
+      function setAuthErrorHtml(html) {
+        if (!html) {
+          adminAuthError.style.display = 'none';
+          return;
+        }
+        adminAuthError.innerHTML = html;
+        adminAuthError.style.display = 'block';
+      }
+
+      document.getElementById('btnAdminEmailLogin').addEventListener('click', async () => {
+        const email = document.getElementById('adminEmail').value.trim();
+        const pass = document.getElementById('adminPass').value;
+        if (!email || !pass) return setAuthErrorHtml('Vui lòng nhập đầy đủ email và mật khẩu.');
+        setAuthErrorHtml('');
+        try {
+          await auth.signInWithEmailAndPassword(email, pass);
+        } catch (err) {
+          setAuthErrorHtml('Đăng nhập thất bại: ' + esc(err.message));
+        }
+      });
+
+      document.getElementById('btnAdminGoogleLogin').addEventListener('click', async () => {
+        setAuthErrorHtml('');
+        try {
+          const provider = new firebase.auth.GoogleAuthProvider();
+          provider.setCustomParameters({ prompt: 'select_account' });
+          await auth.signInWithPopup(provider);
+        } catch (err) {
+          setAuthErrorHtml('Lỗi đăng nhập Google: ' + esc(err.message));
+        }
+      });
+
+      document.getElementById('btnAdminLogout').addEventListener('click', async () => {
+        await writeAuditLog('LOGOUT', 'Quản trị viên chủ động đăng xuất');
+        await auth.signOut();
+      });
+
+      let stateUsers = {};
+      let stateBeacons = {};
+      let stateSos = {};
+      let stateStats = { totalHelps: 0, areas: {}, faculties: {} };
+      let stateAdmins = {};
+      let listenersBound = false;
+
+      auth.onAuthStateChanged(async (user) => {
+        if (!user) {
+          adminAuthScreen.classList.remove('hidden');
+          adminDashboardApp.style.display = 'none';
+          clearTimeout(idleTimer);
+          return;
+        }
+
+        // Kiểm tra quyền quản trị trực tiếp trên node /admins/{uid}
+        try {
+          const adminSnap = await rtdb.ref('admins/' + user.uid).once('value');
+          if (!adminSnap.exists() || !adminSnap.val()) {
+            const deniedUid = user.uid;
+            const deniedEmail = user.email || '';
+            await auth.signOut();
+            setAuthErrorHtml(
+              `<strong>⛔ Từ chối truy cập!</strong> Tài khoản <b>${esc(deniedEmail)}</b> chưa được cấp quyền Quản trị.<br/>` +
+              `Nếu bạn là chủ hệ thống, hãy thêm UID sau vào mục <code>admins</code> trong Firebase Console:<br/>` +
+              `<div class="uid-helper-box">${esc(deniedUid)}</div>`
+            );
+            return;
+          }
+
+          // Hợp lệ -> Mở giao diện quản trị
+          setAuthErrorHtml('');
+          adminAuthScreen.classList.add('hidden');
+          adminDashboardApp.style.display = 'block';
+          document.getElementById('adminIdentityLabel').textContent = `🛡️ ${user.email}`;
+          resetIdleTimer();
+          await writeAuditLog('LOGIN', 'Đăng nhập cổng quản trị thành công');
+
+          if (!listenersBound) {
+            listenersBound = true;
+            bindDatabaseStreams();
+          }
+        } catch (err) {
+          await auth.signOut();
+          setAuthErrorHtml('Lỗi kiểm tra quyền bảo mật từ máy chủ Firebase: ' + esc(err.message));
+        }
+      });
+
+      function bindDatabaseStreams() {
+        rtdb.ref('users').on('value', (snap) => {
+          stateUsers = snap.val() || {};
+          populateFacultyFilter();
+          renderAll();
+        });
+
+        rtdb.ref('beacons').on('value', (snap) => {
+          stateBeacons = snap.val() || {};
+          renderAll();
+        });
+
+        rtdb.ref('sos_signals').on('value', (snap) => {
+          stateSos = snap.val() || {};
+          renderAll();
+        });
+
+        rtdb.ref('stats').on('value', (snap) => {
+          stateStats = snap.val() || { totalHelps: 0, areas: {}, faculties: {} };
+          renderAll();
+        });
+
+        rtdb.ref('admins').on('value', (snap) => {
+          stateAdmins = snap.val() || {};
+          renderAdminsList();
+        });
+
+        rtdb.ref('audit_logs').limitToLast(40).on('value', (snap) => {
+          const logs = Object.values(snap.val() || {}).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+          const container = document.getElementById('auditLogsList');
+          if (!logs.length) {
+            container.innerHTML = '<div style="font-size: 0.84rem; color: #64748b;">Chưa có nhật ký hoạt động.</div>';
+            return;
+          }
+          container.innerHTML = logs
+            .map((l) => {
+              const t = l.timestamp ? new Date(l.timestamp).toLocaleString('vi-VN') : '';
+              return `
+                <div style="padding: 9px 0; border-bottom: 1px solid #e2e8f0; font-size: 0.82rem;">
+                  <div style="display: flex; justify-content: space-between; font-weight: 700;">
+                    <span style="color: var(--primary);">${esc(l.action)}</span>
+                    <span style="color: #64748b; font-weight: 500; font-size: 0.75rem;">${esc(t)}</span>
+                  </div>
+                  <div style="color: #1e293b; margin-top: 2px;">${esc(l.detail)}</div>
+                  <div style="color: #64748b; font-size: 0.74rem;">Bởi: ${esc(l.adminEmail)}</div>
+                </div>
+              `;
+            })
+            .join('');
+        });
+      }
+
+      // Chuyển tab
+      document.querySelectorAll('.nav-tab').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.nav-tab').forEach((b) => b.classList.remove('active'));
+          document.querySelectorAll('.tab-pane').forEach((p) => p.classList.remove('active'));
+          btn.classList.add('active');
+          document.getElementById(btn.getAttribute('data-tab')).classList.add('active');
+        });
+      });
+
+      function populateFacultyFilter() {
+        const sel = document.getElementById('userFacultyFilter');
+        const current = sel.value;
+        const faculties = new Set();
+        Object.values(stateUsers).forEach((u) => {
+          if (u && u.faculty) faculties.add(u.faculty);
+        });
+        sel.innerHTML = '<option value="">Tất cả Khoa / Đơn vị</option>' +
+          Array.from(faculties).sort().map((f) => `<option value="${esc(f)}">${esc(f)}</option>`).join('');
+        sel.value = current;
+      }
+
+      function renderAll() {
+        const usersArr = Object.values(stateUsers);
+        const beaconsArr = Object.values(stateBeacons);
+        const sosArr = Object.values(stateSos);
+
+        // 1. KPI
+        document.getElementById('kpiTotalUsers').textContent = usersArr.length;
+        document.getElementById('kpiOnlineBeacons').textContent = beaconsArr.length;
+        document.getElementById('kpiActiveSos').textContent = sosArr.length;
+        document.getElementById('kpiVerifiedHelps').textContent = Number(stateStats.totalHelps || 0);
+
+        // 2. 4 Khu vực
+        const areas = stateStats.areas || {};
+        const zoneDefs = [
+          { key: 'hanh_chinh', label: 'Khu Hành chính (Hiệu bộ, Thư viện, HT 11.10)' },
+          { key: 'giang_duong', label: 'Khu Giảng đường (A2–A4, B, C, D, H8, K, M, N, V)' },
+          { key: 'ky_tuc_xa', label: 'Khu Ký túc xá (A5 – A12, Phòng y tế, Căng tin)' },
+          { key: 'khu_vuc_khac', label: 'Các khu vực khác (Chùa Thánh Chúa, Sân, Vườn...)' }
+        ];
+        const maxZone = Math.max(1, ...zoneDefs.map((z) => Number(areas[z.key] || 0)));
+        document.getElementById('overviewZonesBreakdown').innerHTML = zoneDefs
+          .map((z) => {
+            const count = Number(areas[z.key] || 0);
+            const pct = Math.round((count / maxZone) * 100);
+            return `
+              <div class="zone-bar-row">
+                <div class="zone-bar-top">
+                  <span>${esc(z.label)}</span>
+                  <span style="color: var(--primary);">${count} lượt</span>
+                </div>
+                <div class="zone-bar-track"><div class="zone-bar-fill" style="width: ${pct}%;"></div></div>
+              </div>
+            `;
+          })
+          .join('');
+
+        // 3. Xếp hạng Khoa
+        const facEntries = Object.entries(stateStats.faculties || {}).sort((a, b) => b[1] - a[1]);
+        document.getElementById('overviewFacultyRanking').innerHTML = facEntries.length
+          ? facEntries
+              .map(
+                ([fac, pts], idx) => `
+                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0; font-size: 0.85rem;">
+                  <span><strong>#${idx + 1}</strong> ${esc(fac)}</span>
+                  <span class="pill pill-amber">${Number(pts).toLocaleString('vi-VN')} Điểm Ấm</span>
+                </div>
+              `
+              )
+              .join('')
+          : '<div style="font-size: 0.84rem; color: #64748b;">Chưa có dữ liệu điểm theo Khoa.</div>';
+
+        // 4. Bảng SOS đang mở
+        document.getElementById('liveSosBadge').textContent = `${sosArr.length} tín hiệu`;
+        const sosBody = document.getElementById('liveSosTableBody');
+        sosBody.innerHTML = sosArr.length
+          ? sosArr
+              .map(
+                (s) => `
+                <tr>
+                  <td><strong>${esc(s.name)}</strong><br/><span style="font-size: 0.76rem; color: #64748b;">${esc(s.faculty)}</span></td>
+                  <td><strong>${esc(s.area)}</strong><br/><span class="pill pill-slate">${esc(s.group)}</span></td>
+                  <td>${esc(s.message)}</td>
+                  <td><strong style="font-family: monospace; font-size: 0.95rem; color: var(--primary);">${esc(s.verifyPin || '----')}</strong></td>
+                  <td>${s.helperName ? `<span class="pill pill-green">✓ ${esc(s.helperName)}</span>` : '<span class="pill pill-amber">Đang chờ</span>'}</td>
+                  <td>
+                    <button type="button" class="btn btn-danger btn-sm" data-close-sos="${esc(s.uid)}" data-sos-name="${esc(s.name)}">Đóng SOS</button>
+                  </td>
+                </tr>
+              `
+              )
+              .join('')
+          : '<tr><td colspan="6" style="text-align: center; color: #64748b;">Hiện không có tín hiệu SOS nào đang mở.</td></tr>';
+
+        sosBody.querySelectorAll('[data-close-sos]').forEach((btn) => {
+          btn.addEventListener('click', async () => {
+            const uid = btn.getAttribute('data-close-sos');
+            const name = btn.getAttribute('data-sos-name');
+            if (!confirm(`Xác nhận đóng tín hiệu SOS của "${name}"?`)) return;
+            await rtdb.ref('sos_signals/' + uid).remove();
+            await writeAuditLog('FORCE_CLOSE_SOS', `Đóng tín hiệu SOS của ${name} (${uid})`);
+            showToast('✓ Đã đóng tín hiệu SOS.');
+          });
+        });
+
+        // 5. Bảng Người Thắp Lửa trực tuyến
+        document.getElementById('liveBeaconsBadge').textContent = `${beaconsArr.length} trực tuyến`;
+        const beaconBody = document.getElementById('liveBeaconsTableBody');
+        beaconBody.innerHTML = beaconsArr.length
+          ? beaconsArr
+              .map(
+                (b) => `
+                <tr>
+                  <td><strong>${esc(b.name)}</strong></td>
+                  <td>${esc(b.faculty)}</td>
+                  <td style="font-family: monospace; font-size: 0.8rem;">${Number(b.lat).toFixed(5)}, ${Number(b.lng).toFixed(5)}</td>
+                  <td>${b.isLiveGps ? '<span class="pill pill-green">GPS Vệ tinh</span>' : '<span class="pill pill-slate">Tọa độ điểm</span>'}</td>
+                  <td>
+                    <button type="button" class="btn btn-outline btn-sm" data-kick-beacon="${esc(b.uid)}" data-beacon-name="${esc(b.name)}">Gỡ trạng thái</button>
+                  </td>
+                </tr>
+              `
+              )
+              .join('')
+          : '<tr><td colspan="5" style="text-align: center; color: #64748b;">Chưa có Người Thắp Lửa nào đang bật trực tuyến.</td></tr>';
+
+        beaconBody.querySelectorAll('[data-kick-beacon]').forEach((btn) => {
+          btn.addEventListener('click', async () => {
+            const uid = btn.getAttribute('data-kick-beacon');
+            const name = btn.getAttribute('data-beacon-name');
+            await rtdb.ref('beacons/' + uid).remove();
+            await writeAuditLog('REMOVE_BEACON', `Gỡ trạng thái trực tuyến của ${name} (${uid})`);
+            showToast('✓ Đã gỡ trạng thái trực tuyến.');
+          });
+        });
+
+        // 6. Bảng thành viên
+        renderUsersTable();
+      }
+
+      function renderUsersTable() {
+        const q = document.getElementById('userSearchInput').value.trim().toLowerCase();
+        const facFilter = document.getElementById('userFacultyFilter').value;
+
+        const filtered = Object.values(stateUsers)
+          .filter((u) => {
+            if (!u) return false;
+            if (facFilter && u.faculty !== facFilter) return false;
+            if (q) {
+              const hay = `${u.name || ''} ${u.email || ''} ${u.studentId || ''} ${u.uid || ''}`.toLowerCase();
+              if (!hay.includes(q)) return false;
+            }
+            return true;
+          })
+          .sort((a, b) => Number(b.points || 0) - Number(a.points || 0));
+
+        const tbody = document.getElementById('usersTableBody');
+        tbody.innerHTML = filtered.length
+          ? filtered
+              .map(
+                (u) => `
+                <tr>
+                  <td><strong>${esc(u.name)}</strong><br/><span style="font-size: 0.72rem; color: #64748b; font-family: monospace;">UID: ${esc(u.uid)}</span></td>
+                  <td>${esc(u.email)}<br/><span style="font-size: 0.76rem; color: #64748b;">Mã: ${esc(u.studentId || '—')}</span></td>
+                  <td>${esc(u.faculty || '—')}</td>
+                  <td><strong style="color: var(--primary);">${Number(u.points || 0)}đ</strong></td>
+                  <td>${Number(u.helps || 0)} lượt</td>
+                  <td>
+                    <button type="button" class="btn btn-outline btn-sm" data-manage-user="${esc(u.uid)}">Chi tiết / Điểm</button>
+                  </td>
+                </tr>
+              `
+              )
+              .join('')
+          : '<tr><td colspan="6" style="text-align: center; color: #64748b;">Không tìm thấy thành viên phù hợp.</td></tr>';
+
+        tbody.querySelectorAll('[data-manage-user]').forEach((btn) => {
+          btn.addEventListener('click', () => openUserDetailModal(btn.getAttribute('data-manage-user')));
+        });
+      }
+
+      document.getElementById('userSearchInput').addEventListener('input', renderUsersTable);
+      document.getElementById('userFacultyFilter').addEventListener('change', renderUsersTable);
+
+      // Modal điều chỉnh điểm & xem lịch sử
+      let editingUserUid = null;
+      const userDetailModal = document.getElementById('userDetailModal');
+
+      function openUserDetailModal(uid) {
+        const u = stateUsers[uid];
+        if (!u) return;
+        editingUserUid = uid;
+        document.getElementById('modalUserName').textContent = `${u.name} (${Number(u.points || 0)} Điểm Ấm)`;
+        document.getElementById('modalUserMeta').textContent = `${u.email} • ${u.faculty || ''} • UID: ${uid}`;
+        document.getElementById('adjustPointsDelta').value = '';
+        document.getElementById('adjustPointsReason').value = '';
+
+        const histArr = Object.values(u.history || {}).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        document.getElementById('modalUserHistory').innerHTML = histArr.length
+          ? histArr
+              .map(
+                (h) => `
+                <div style="padding: 5px 0; border-bottom: 1px solid #f1f5f9;">
+                  <strong>${esc(h.title)}</strong> (${esc(h.code)})<br/>
+                  <span style="color: #64748b;">Cùng: ${esc(h.partner)} • ${esc(h.time)}</span>
+                </div>
+              `
+              )
+              .join('')
+          : '<span style="color: #64748b;">Chưa có lịch sử xác minh QR.</span>';
+
+        userDetailModal.classList.add('open');
+      }
+
+      document.getElementById('btnCloseUserModal').addEventListener('click', () => {
+        userDetailModal.classList.remove('open');
+        editingUserUid = null;
+      });
+
+      document.getElementById('btnConfirmAdjustPoints').addEventListener('click', async () => {
+        if (!editingUserUid || !stateUsers[editingUserUid]) return;
+        const delta = parseInt(document.getElementById('adjustPointsDelta').value, 10);
+        const reason = document.getElementById('adjustPointsReason').value.trim();
+
+        if (isNaN(delta) || delta === 0) return showToast('⚠ Vui lòng nhập số điểm khác 0.');
+        if (!reason) return showToast('⚠ Vui lòng nhập lý do điều chỉnh điểm.');
+
+        const target = stateUsers[editingUserUid];
+        const newPoints = Math.max(0, Number(target.points || 0) + delta);
+        const nowStr = new Date().toLocaleString('vi-VN');
+
+        await rtdb.ref('users/' + editingUserUid).update({ points: newPoints });
+        await rtdb.ref('users/' + editingUserUid + '/history').push({
+          title: `Điều chỉnh từ Ban điều hành (${delta > 0 ? '+' + delta : delta}đ)`,
+          partner: reason,
+          time: nowStr,
+          code: 'ADMIN',
+          pointsEarned: delta,
+          timestamp: firebase.database.ServerValue.TIMESTAMP
+        });
+
+        await writeAuditLog(
+          'ADJUST_POINTS',
+          `Điều chỉnh ${delta > 0 ? '+' + delta : delta}đ cho ${target.name} (${target.email}). Lý do: ${reason}`
+        );
+
+        userDetailModal.classList.remove('open');
+        showToast(`✓ Đã cập nhật điểm cho ${target.name}.`);
+      });
+
+      // Quản lý danh sách Admin
+      function renderAdminsList() {
+        const container = document.getElementById('adminAccountsList');
+        const entries = Object.entries(stateAdmins).filter(([, val]) => Boolean(val));
+        container.innerHTML = entries
+          .map(([uid, info]) => {
+            const u = stateUsers[uid];
+            const label = u ? `${u.name} (${u.email})` : (typeof info === 'string' ? info : uid);
+            const isSelf = auth.currentUser && auth.currentUser.uid === uid;
+            return `
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 8px; font-size: 0.82rem;">
+                <div>
+                  <strong>${esc(label)}</strong>
+                  <div style="font-family: monospace; font-size: 0.72rem; color: #64748b;">${esc(uid)}</div>
+                </div>
+                ${
+                  isSelf
+                    ? '<span class="pill pill-green">Bạn</span>'
+                    : `<button type="button" class="btn btn-danger btn-sm" data-revoke-admin="${esc(uid)}">Thu hồi</button>`
+                }
+              </div>
+            `;
+          })
+          .join('');
+
+        container.querySelectorAll('[data-revoke-admin]').forEach((btn) => {
+          btn.addEventListener('click', async () => {
+            const uid = btn.getAttribute('data-revoke-admin');
+            if (!confirm('Thu hồi quyền quản trị của UID: ' + uid + '?')) return;
+            await rtdb.ref('admins/' + uid).remove();
+            await writeAuditLog('REVOKE_ADMIN', `Thu hồi quyền quản trị của UID ${uid}`);
+            showToast('✓ Đã thu hồi quyền quản trị.');
+          });
+        });
+      }
+
+      document.getElementById('btnGrantAdmin').addEventListener('click', async () => {
+        const uid = document.getElementById('newAdminUidInput').value.trim();
+        if (!uid) return showToast('⚠ Vui lòng dán UID của thành viên.');
+        await rtdb.ref('admins/' + uid).set(true);
+        await writeAuditLog('GRANT_ADMIN', `Cấp quyền quản trị cho UID ${uid}`);
+        document.getElementById('newAdminUidInput').value = '';
+        showToast('✓ Đã cấp quyền quản trị!');
+      });
+
+      // Xuất báo cáo Excel CSV (có BOM UTF-8 chuẩn tiếng Việt)
+      document.getElementById('btnExportCsv').addEventListener('click', async () => {
+        const rows = [['Ho va ten', 'Email', 'Ma sinh vien / can bo', 'Khoa / Don vi', 'Diem Am', 'So luot ho tro']];
+        Object.values(stateUsers)
+          .sort((a, b) => Number(b.points || 0) - Number(a.points || 0))
+          .forEach((u) => {
+            rows.push([
+              `"${String(u.name || '').replace(/"/g, '""')}"`,
+              `"${String(u.email || '').replace(/"/g, '""')}"`,
+              `"${String(u.studentId || '').replace(/"/g, '""')}"`,
+              `"${String(u.faculty || '').replace(/"/g, '""')}"`,
+              Number(u.points || 0),
+              Number(u.helps || 0)
+            ]);
+          });
+
+        const csvContent = '\uFEFF' + rows.map((r) => r.join(',')).join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Bao-cao-HNUE-WarmLink-${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        await writeAuditLog('EXPORT_CSV', `Xuất báo cáo danh sách ${rows.length - 1} thành viên`);
+        showToast('⬇ Đã xuất file báo cáo Excel (.CSV)!');
+      });
+    })();
+  </script>
+</body>
+</html>
