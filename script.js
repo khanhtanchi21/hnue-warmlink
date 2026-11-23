@@ -63,7 +63,7 @@
     { value: 'Sân vận động', zone: 'khu_vuc_khac', zoneLabel: 'Các khu vực khác', detail: 'Sân vận động', lat: 21.0386, lng: 105.7854 }
   ];
 
-  // 2. State người dùng hiện tại (100% đồng bộ từ cơ sở dữ liệu)
+  // 2. State người dùng hiện tại
   let currentUser = null;
   let userProfile = {
     uid: '',
@@ -126,13 +126,19 @@
     if (code === 'auth/user-not-found' || code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
       return 'Email hoặc mật khẩu chưa chính xác.';
     }
+    if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+      return 'Bạn đã đóng cửa sổ đăng nhập Google. Vui lòng thử lại.';
+    }
+    if (code === 'auth/network-request-failed') {
+      return 'Lỗi kết nối mạng. Vui lòng kiểm tra Internet và thử lại.';
+    }
     if (code === 'auth/operation-not-allowed') {
       return 'Chưa bật phương thức đăng nhập này trong Firebase Authentication.';
     }
     if (code === 'auth/unauthorized-domain') {
       return 'Tên miền chưa được thêm vào Authorized domains trong Firebase.';
     }
-    return 'Lỗi xác thực: ' + (err.message || 'Vui lòng thử lại.');
+    return 'Lỗi xác thực: ' + (err && err.message ? err.message : 'Vui lòng thử lại.');
   }
 
   authTabLogin.addEventListener('click', () => {
@@ -196,28 +202,50 @@
     }
   });
 
+  async function ensureGoogleUserProfile(u) {
+    if (!u) return;
+    const snap = await rtdb.ref('users/' + u.uid).once('value');
+    if (!snap.exists()) {
+      await rtdb.ref('users/' + u.uid).set({
+        uid: u.uid,
+        name: u.displayName || (u.email ? u.email.split('@')[0] : 'Thành viên HNUE'),
+        email: u.email || '',
+        studentId: '',
+        faculty: 'Khoa Công nghệ thông tin',
+        points: 0,
+        helps: 0,
+        createdAt: firebase.database.ServerValue.TIMESTAMP
+      });
+    }
+  }
+
+  auth.getRedirectResult().then(async (result) => {
+    if (result && result.user) {
+      await ensureGoogleUserProfile(result.user);
+      notify(`✓ Đã đăng nhập với ${result.user.email}`);
+    }
+  }).catch((err) => {
+    showAuthError(mapFirebaseAuthError(err));
+  });
+
   document.getElementById('btnGoogleLogin').addEventListener('click', async () => {
     showAuthError('');
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
     try {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: 'select_account' });
       const result = await auth.signInWithPopup(provider);
-      const u = result.user;
-      const snap = await rtdb.ref('users/' + u.uid).once('value');
-      if (!snap.exists()) {
-        await rtdb.ref('users/' + u.uid).set({
-          uid: u.uid,
-          name: u.displayName || u.email.split('@')[0],
-          email: u.email,
-          studentId: '',
-          faculty: 'Khoa Công nghệ thông tin',
-          points: 0,
-          helps: 0,
-          createdAt: firebase.database.ServerValue.TIMESTAMP
-        });
-      }
-      notify(`✓ Đã đăng nhập với ${u.email}`);
+      await ensureGoogleUserProfile(result.user);
+      notify(`✓ Đã đăng nhập với ${result.user.email}`);
     } catch (err) {
+      if (err && err.code === 'auth/popup-blocked') {
+        try {
+          await auth.signInWithRedirect(provider);
+          return;
+        } catch (redirectErr) {
+          showAuthError(mapFirebaseAuthError(redirectErr));
+          return;
+        }
+      }
       showAuthError(mapFirebaseAuthError(err));
     }
   });
@@ -237,20 +265,7 @@
     }
 
     authGateOverlay.classList.add('hidden');
-    const userRef = rtdb.ref('users/' + user.uid);
-    const snap = await userRef.once('value');
-    if (!snap.exists()) {
-      await userRef.set({
-        uid: user.uid,
-        name: user.displayName || (user.email ? user.email.split('@')[0] : 'Thành viên HNUE'),
-        email: user.email || '',
-        studentId: '',
-        faculty: 'Khoa Công nghệ thông tin',
-        points: 0,
-        helps: 0,
-        createdAt: firebase.database.ServerValue.TIMESTAMP
-      });
-    }
+    await ensureGoogleUserProfile(user);
 
     if (activeListenerUid && activeListenerUid !== user.uid) {
       rtdb.ref('users/' + activeListenerUid).off();
@@ -285,7 +300,7 @@
     }
   });
 
-  // 5. Đồng bộ Realtime Database (chỉ lấy dữ liệu công khai cần thiết cho Radar & Bản đồ nhiệt)
+  // 5. Đồng bộ Realtime Database
   function attachGlobalRealtimeListeners() {
     rtdb.ref('beacons').on('value', (snap) => {
       const data = snap.val() || {};
@@ -307,7 +322,7 @@
           remoteBeacons[uid] = {
             id: uid,
             uid: uid,
-            type: 'volunteer',
+            kind: 'volunteer',
             initials: initials || 'TV',
             name: b.name,
             faculty: b.faculty || 'HNUE',
@@ -563,7 +578,7 @@
     );
   });
 
-  // 7. Quy trình Mã QR / Mã PIN 4 số xác minh hỗ trợ (Đa nền tảng iOS + Android + Desktop)
+  // 7. Quy trình Mã QR / Mã PIN 4 số xác minh hỗ trợ
   const showVerifyQrModal = document.getElementById('showVerifyQrModal');
   const sosVerifyQrHolder = document.getElementById('sosVerifyQrHolder');
   const sosVerifyPinText = document.getElementById('sosVerifyPinText');
@@ -763,7 +778,8 @@
 
     isVerifyingNow = true;
     try {
-      const sosSnap = await rtdb.ref('sos_signals/' + activeVerifyTargetSos.uid).once('value');
+      const targetSosUid = activeVerifyTargetSos.uid;
+      const sosSnap = await rtdb.ref('sos_signals/' + targetSosUid).once('value');
       const liveSos = sosSnap.val();
       if (!liveSos) {
         closeScanVerifyModal();
@@ -790,8 +806,8 @@
 
       // 1. Cộng +25 Điểm Ấm & +1 lượt hỗ trợ cho người giúp
       await rtdb.ref('users/' + currentUser.uid).update({
-        points: Number(userProfile.points || 0) + 25,
-        helps: Number(userProfile.helps || 0) + 1
+        points: firebase.database.ServerValue.increment(25),
+        helps: firebase.database.ServerValue.increment(1)
       });
       await rtdb.ref('users/' + currentUser.uid + '/history').push({
         title: `Hỗ trợ tại ${liveSos.area}`,
@@ -802,22 +818,24 @@
         timestamp: firebase.database.ServerValue.TIMESTAMP
       });
 
-      // 2. Ghi lịch sử cho người được giúp
-      await rtdb.ref('users/' + liveSos.uid + '/history').push({
-        title: `Được hỗ trợ tại ${liveSos.area}`,
-        partner: `${userProfile.name} (${userProfile.faculty})`,
-        time: nowStr,
-        code: receiptCode,
-        pointsEarned: 0,
-        timestamp: firebase.database.ServerValue.TIMESTAMP
-      });
+      // 2. Ghi lịch sử cho người được giúp (tách riêng để tránh lỗi phân quyền làm gián đoạn)
+      try {
+        await rtdb.ref('users/' + liveSos.uid + '/history').push({
+          title: `Được hỗ trợ tại ${liveSos.area}`,
+          partner: `${userProfile.name} (${userProfile.faculty})`,
+          time: nowStr,
+          code: receiptCode,
+          pointsEarned: 0,
+          timestamp: firebase.database.ServerValue.TIMESTAMP
+        });
+      } catch (e) {}
 
       // 3. Cập nhật thống kê bản đồ nhiệt 4 khu vực & bảng xếp hạng Khoa
       const zoneKey = liveSos.zoneKey || 'giang_duong';
       const myFacKey = sanitizeRtdbKey(userProfile.faculty || 'Khoa Công nghệ thông tin');
-      await rtdb.ref('stats/totalHelps').set(Number(globalStats.totalHelps || 0) + 1);
-      await rtdb.ref('stats/areas/' + zoneKey).set(Number((globalStats.areas && globalStats.areas[zoneKey]) || 0) + 1);
-      await rtdb.ref('stats/faculties/' + myFacKey).set(Number((globalStats.faculties && globalStats.faculties[myFacKey]) || 0) + 25);
+      await rtdb.ref('stats/totalHelps').set(firebase.database.ServerValue.increment(1));
+      await rtdb.ref('stats/areas/' + zoneKey).set(firebase.database.ServerValue.increment(1));
+      await rtdb.ref('stats/faculties/' + myFacKey).set(firebase.database.ServerValue.increment(25));
 
       // 4. Xóa tín hiệu SOS đã hoàn thành
       await rtdb.ref('sos_signals/' + liveSos.uid).remove();
@@ -859,7 +877,7 @@
           : '';
 
         return `
-        <div class="vol-card" style="border-color: #f43f5e; background: #fff1f2;">
+        <div class="vol-card" id="card-sos_${sos.uid}" style="border-color: #f43f5e; background: #fff1f2;">
           <div class="vol-card-top">
             <div>
               <div class="vol-title" style="color: #be123c;">🆘 ${sos.name} (${sos.faculty || 'HNUE'})</div>
@@ -871,10 +889,10 @@
             <span class="vol-dist-tag" style="background: #fff; color: #e11d48; font-size: 0.84rem;">${sos.distM}m</span>
           </div>
           <div class="vol-card-actions" style="grid-template-columns: 1fr 1.25fr;">
-            <button type="button" class="btn-chat-vol" data-accept-sos-uid="${sos.uid}" style="font-size: 0.84rem; padding: 10px;">
+            <button type="button" class="btn-chat-vol" data-accept-sos-uid="${sos.uid}">
               ${isAcceptedByMe ? '💬 Nhắn tin' : '🤝 Nhận & Nhắn tin'}
             </button>
-            <button type="button" class="btn-confirm-qr" data-verify-sos-uid="${sos.uid}" style="font-size: 0.84rem; padding: 10px;">
+            <button type="button" class="btn-confirm-qr" data-verify-sos-uid="${sos.uid}">
               📷 Quét mã xác nhận
             </button>
           </div>
@@ -984,6 +1002,17 @@
     blipsLayer.innerHTML = radarHtml;
     mapPinsLayer.innerHTML = mapHtml;
 
+    document.querySelectorAll('.dynamic-vol-blip').forEach((blip) => {
+      blip.addEventListener('click', () => {
+        selectedPeerId = blip.getAttribute('data-peer-id');
+        renderRadarAndNearbyList();
+        const targetCard = document.getElementById('card-' + selectedPeerId);
+        if (targetCard) {
+          targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      });
+    });
+
     const volunteersOnly = enriched.filter((x) => x.kind !== 'sos');
     if (!volunteersOnly.length) {
       listContainer.innerHTML = `
@@ -1009,7 +1038,7 @@
               <span class="vol-dist-tag">${p.distM}m (~${p.walkMin}p)</span>
             </div>
             <div class="vol-card-actions" style="grid-template-columns: 1fr;">
-              <button type="button" class="btn-chat-vol" data-chat-uid="${p.uid}" style="font-size: 0.88rem; padding: 10px;">
+              <button type="button" class="btn-chat-vol" data-chat-uid="${p.uid}">
                 💬 Nhắn tin trực tiếp
               </button>
             </div>
@@ -1125,7 +1154,7 @@
     lbEl.innerHTML = entries
       .map(
         ([fac, score], idx) => `
-        <div class="faculty-rank-item" style="font-size: 0.88rem;">
+        <div class="faculty-rank-item">
           <span>${medals[idx] || '🏅'} <strong>${fac}</strong></span>
           <span class="rank-score-text">${Number(score).toLocaleString('vi-VN')} Điểm Ấm</span>
         </div>
@@ -1362,7 +1391,7 @@
     notify('Đã đăng xuất tài khoản.');
   });
 
-  // 15. Modal Chứng nhận & Đóng Modal linh hoạt khi bấm nền tối hoặc phím Esc
+  // 15. Modal Chứng nhận & Đóng Modal linh hoạt
   const certSheetModal = document.getElementById('certSheetModal');
   document.getElementById('openFullCertBtn').addEventListener('click', () => certSheetModal.classList.add('open'));
   document.getElementById('closeCertSheetBtn').addEventListener('click', () => certSheetModal.classList.remove('open'));
@@ -1385,166 +1414,32 @@
     if (e.key === 'Escape') closeAllModalsSafely();
   });
 
-  // 16. Trình tạo mã QR chuẩn ISO (Reed-Solomon QR Code)
-  const QRGen = (function () {
-    const EXP = new Array(256);
-    const LOG = new Array(256);
-    let x = 1;
-    for (let i = 0; i < 255; i++) {
-      EXP[i] = x;
-      LOG[x] = i;
-      x = (x << 1) ^ (x & 0x80 ? 0x11d : 0);
+  // 16. Trình tạo mã QR chuẩn (hỗ trợ qrcode-generator + fallback offline)
+  function buildQrMatrix(textStr) {
+    if (typeof window.qrcode === 'function') {
+      const qr = window.qrcode(0, 'M');
+      qr.addData(textStr, 'Byte');
+      qr.make();
+      const count = qr.getModuleCount();
+      const mat = [];
+      for (let r = 0; r < count; r++) {
+        const row = [];
+        for (let c = 0; c < count; c++) {
+          row.push(qr.isDark(r, c) ? 1 : 0);
+        }
+        mat.push(row);
+      }
+      return mat;
     }
-    for (let i = 255; i < 512; i++) EXP[i] = EXP[i - 255];
-
-    function gfMul(a, b) {
-      return a === 0 || b === 0 ? 0 : EXP[LOG[a] + LOG[b]];
-    }
-    function rsGenerator(degree) {
-      let poly = [1];
-      for (let i = 0; i < degree; i++) {
-        const next = new Array(poly.length + 1).fill(0);
-        const factor = EXP[i];
-        for (let j = 0; j < poly.length; j++) {
-          next[j] ^= poly[j];
-          next[j + 1] ^= gfMul(poly[j], factor);
-        }
-        poly = next;
-      }
-      return poly;
-    }
-    function rsEncode(data, ecLen) {
-      const gen = rsGenerator(ecLen);
-      const res = data.concat(new Array(ecLen).fill(0));
-      for (let i = 0; i < data.length; i++) {
-        const coef = res[i];
-        if (coef !== 0) {
-          for (let j = 0; j < gen.length; j++) res[i + j] ^= gfMul(gen[j], coef);
-        }
-      }
-      return res.slice(data.length);
-    }
-    const VERSIONS = [
-      null,
-      { size: 21, totalCodewords: 26, ecCodewords: 7, dataCodewords: 19, align: [] },
-      { size: 25, totalCodewords: 44, ecCodewords: 10, dataCodewords: 34, align: [6, 18] },
-      { size: 29, totalCodewords: 70, ecCodewords: 15, dataCodewords: 55, align: [6, 22] },
-      { size: 33, totalCodewords: 100, ecCodewords: 20, dataCodewords: 80, align: [6, 26] },
-      { size: 37, totalCodewords: 134, ecCodewords: 26, dataCodewords: 108, align: [6, 30] },
-      { size: 41, totalCodewords: 172, ecCodewords: 36, dataCodewords: 136, align: [6, 34] }
-    ];
-    function createMatrix(text) {
-      const bytes = Array.from(new TextEncoder().encode(text));
-      let ver = 1;
-      while (ver < VERSIONS.length && bytes.length + 2 > VERSIONS[ver].dataCodewords) ver++;
-      if (ver >= VERSIONS.length) ver = VERSIONS.length - 1;
-      const cfg = VERSIONS[ver];
-      const payload = bytes.slice(0, cfg.dataCodewords - 2);
-      const bits = [];
-      const pushBits = (val, len) => {
-        for (let i = len - 1; i >= 0; i--) bits.push((val >> i) & 1);
-      };
-      pushBits(0b0100, 4);
-      pushBits(payload.length, 8);
-      payload.forEach((b) => pushBits(b, 8));
-      pushBits(0, Math.min(4, cfg.dataCodewords * 8 - bits.length));
-      while (bits.length % 8 !== 0) bits.push(0);
-      const dataCW = [];
-      for (let i = 0; i < bits.length; i += 8) {
-        let byte = 0;
-        for (let j = 0; j < 8; j++) byte = (byte << 1) | bits[i + j];
-        dataCW.push(byte);
-      }
-      const padBytes = [0xec, 0x11];
-      let padIdx = 0;
-      while (dataCW.length < cfg.dataCodewords) {
-        dataCW.push(padBytes[padIdx % 2]);
-        padIdx++;
-      }
-      const allCW = dataCW.concat(rsEncode(dataCW, cfg.ecCodewords));
-      const allBits = [];
-      allCW.forEach((cw) => {
-        for (let i = 7; i >= 0; i--) allBits.push((cw >> i) & 1);
-      });
-      const n = cfg.size;
-      const grid = Array.from({ length: n }, () => new Array(n).fill(null));
-      const reserved = Array.from({ length: n }, () => new Array(n).fill(false));
-      function setModule(r, c, val, isFunc = true) {
-        if (r >= 0 && r < n && c >= 0 && c < n) {
-          grid[r][c] = val ? 1 : 0;
-          if (isFunc) reserved[r][c] = true;
-        }
-      }
-      function placeFinder(r0, c0) {
-        for (let r = -1; r <= 7; r++) {
-          for (let c = -1; c <= 7; c++) {
-            const inOuter = r >= 0 && r <= 6 && c >= 0 && c <= 6;
-            const onBorder = r === 0 || r === 6 || c === 0 || c === 6;
-            const inCenter = r >= 2 && r <= 4 && c >= 2 && c <= 4;
-            setModule(r0 + r, c0 + c, inOuter && (onBorder || inCenter), true);
-          }
-        }
-      }
-      placeFinder(0, 0);
-      placeFinder(0, n - 7);
-      placeFinder(n - 7, 0);
-      if (cfg.align.length > 0) {
-        const center = cfg.align[1];
-        for (let r = -2; r <= 2; r++) {
-          for (let c = -2; c <= 2; c++) {
-            const dark = Math.abs(r) === 2 || Math.abs(c) === 2 || (r === 0 && c === 0);
-            setModule(center + r, center + c, dark, true);
-          }
-        }
-      }
-      for (let i = 8; i < n - 8; i++) {
-        setModule(6, i, i % 2 === 0, true);
-        setModule(i, 6, i % 2 === 0, true);
-      }
-      setModule(n - 8, 8, 1, true);
-      for (let i = 0; i < 9; i++) {
-        if (i !== 6) {
-          reserved[8][i] = true;
-          reserved[i][8] = true;
-        }
-      }
-      for (let i = 0; i < 8; i++) {
-        reserved[8][n - 1 - i] = true;
-        reserved[n - 1 - i][8] = true;
-      }
-      let bitIdx = 0;
-      let upward = true;
-      for (let col = n - 1; col > 0; col -= 2) {
-        if (col === 6) col--;
-        for (let i = 0; i < n; i++) {
-          const r = upward ? n - 1 - i : i;
-          for (let dc = 0; dc < 2; dc++) {
-            const c = col - dc;
-            if (!reserved[r][c]) {
-              const rawBit = bitIdx < allBits.length ? allBits[bitIdx++] : 0;
-              grid[r][c] = (r + c) % 2 === 0 ? rawBit ^ 1 : rawBit;
-            }
-          }
-        }
-        upward = !upward;
-      }
-      const formatBits = 0x77c4;
-      for (let i = 0; i < 15; i++) {
-        const bit = (formatBits >> i) & 1;
-        if (i < 6) grid[i][8] = bit;
-        else if (i < 8) grid[i + 1][8] = bit;
-        else grid[n - 15 + i][8] = bit;
-        if (i < 8) grid[8][n - 1 - i] = bit;
-        else if (i === 8) grid[8][7] = bit;
-        else grid[8][14 - i] = bit;
-      }
-      return grid;
-    }
-    return { createMatrix };
-  })();
+    return [];
+  }
 
   function renderQrSvgInto(containerEl, textStr, pxSize) {
-    const matrix = QRGen.createMatrix(textStr);
+    const matrix = buildQrMatrix(textStr);
+    if (!matrix.length) {
+      containerEl.innerHTML = `<div style="padding: 12px; font-size: 0.8rem; color: #475569;">${textStr}</div>`;
+      return [];
+    }
     const n = matrix.length;
     const quiet = 4;
     const total = n + quiet * 2;
@@ -1584,7 +1479,7 @@
     if (!qrMatrix.length) return;
     const n = qrMatrix.length;
     const quiet = 4;
-    const scale = 18;
+    const scale = 16;
     const size = (n + quiet * 2) * scale;
     const canvas = document.createElement('canvas');
     canvas.width = size;
