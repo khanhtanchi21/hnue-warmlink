@@ -2,12 +2,365 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#ea580c" />
+  <meta name="description" content="HNUE WarmLink – Nền tảng kết nối hỗ trợ khẩn cấp và lan tỏa hành động đẹp trong cộng đồng ĐHSP Hà Nội." />
   <title>HNUE WarmLink – Đốm Lửa Sẻ Chia</title>
+  <link rel="manifest" href="manifest.json" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="data:image/png;base64,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" />
   <link rel="stylesheet" href="style.css" />
+  <style>
+    :root {
+      --font-main: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    html {
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+
+    body, button, input, select, textarea {
+      font-family: var(--font-main) !important;
+      letter-spacing: -0.01em;
+    }
+
+    body {
+      color: #0f172a;
+      line-height: 1.55;
+    }
+
+    .app-title {
+      font-size: 1.15rem !important;
+      font-weight: 800 !important;
+      letter-spacing: -0.02em;
+    }
+
+    .app-slogan {
+      font-size: 0.78rem !important;
+      font-weight: 500 !important;
+      color: #475569 !important;
+    }
+
+    .page-title {
+      font-size: 1.16rem !important;
+      font-weight: 800 !important;
+      color: #0f172a !important;
+      line-height: 1.3;
+    }
+
+    .page-subtitle {
+      font-size: 0.84rem !important;
+      color: #475569 !important;
+      line-height: 1.45;
+    }
+
+    .field-label {
+      font-size: 0.88rem !important;
+      font-weight: 700 !important;
+      color: #1e293b !important;
+    }
+
+    .mobile-input,
+    .mobile-select,
+    .mobile-textarea {
+      font-size: 0.94rem !important;
+      font-weight: 500 !important;
+      color: #0f172a !important;
+      line-height: 1.5 !important;
+      padding: 11px 13px !important;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+
+    .mobile-select {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .area-detail-note {
+      margin-top: 7px;
+      padding: 9px 12px;
+      border-radius: 10px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      font-size: 0.82rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+
+    .support-chip {
+      font-size: 0.84rem !important;
+      font-weight: 600 !important;
+      padding: 10px 10px !important;
+    }
+
+    .btn-primary-full,
+    .btn-secondary-full {
+      font-size: 0.92rem !important;
+      font-weight: 700 !important;
+      padding: 12px 16px !important;
+      transition: transform 0.12s ease, opacity 0.15s ease;
+    }
+
+    .btn-primary-full:active,
+    .btn-secondary-full:active {
+      transform: scale(0.985);
+    }
+
+    .vol-title {
+      font-size: 0.95rem !important;
+      font-weight: 700 !important;
+    }
+
+    .vol-sub {
+      font-size: 0.84rem !important;
+      line-height: 1.45 !important;
+    }
+
+    .vol-gps-meta {
+      font-size: 0.76rem !important;
+    }
+
+    .tab-nav-link span {
+      font-size: 0.74rem !important;
+      font-weight: 700 !important;
+    }
+
+    /* Giao diện Xác thực tài khoản */
+    .auth-gate-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: linear-gradient(155deg, #0f172a 0%, #1e293b 55%, #431407 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      overflow-y: auto;
+    }
+    .auth-gate-overlay.hidden {
+      display: none;
+    }
+    .auth-box-card {
+      width: 100%;
+      max-width: 420px;
+      background: #ffffff;
+      border-radius: 22px;
+      padding: 24px 22px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+    }
+    .auth-brand-top {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .auth-brand-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #fff7ed;
+      color: #c2410c;
+      border: 1px solid #fed7aa;
+      font-size: 0.76rem;
+      font-weight: 800;
+      padding: 5px 12px;
+      border-radius: 999px;
+      margin-bottom: 8px;
+    }
+    .auth-main-heading {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0;
+    }
+    .auth-sub-caption {
+      font-size: 0.84rem;
+      color: #475569;
+      margin-top: 5px;
+      line-height: 1.45;
+    }
+    .auth-mode-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: #f1f5f9;
+      padding: 4px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+    .auth-tab-btn {
+      border: none;
+      background: transparent;
+      padding: 9px;
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: #475569;
+      border-radius: 9px;
+      cursor: pointer;
+    }
+    .auth-tab-btn.active {
+      background: #ffffff;
+      color: #ea580c;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+    }
+    .btn-google-signin {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: #ffffff;
+      color: #0f172a;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 11px 14px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .btn-google-signin:hover {
+      background: #f8fafc;
+    }
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 14px 0;
+      color: #64748b;
+      font-size: 0.76rem;
+      font-weight: 700;
+    }
+    .auth-divider::before,
+    .auth-divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: #e2e8f0;
+    }
+    .auth-error-msg {
+      background: #fef2f2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      display: none;
+      line-height: 1.45;
+    }
+    .active-sos-banner {
+      background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%);
+      border: 1.5px solid #f43f5e;
+      border-radius: 16px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+    }
+    .db-stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 12px 0 16px;
+    }
+    .db-stat-tile {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+    }
+    .db-stat-num {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #ea580c;
+    }
+    .db-stat-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    /* Giao diện Quét / Hiển thị mã xác minh hỗ trợ */
+    .verify-pin-display {
+      font-size: 2.1rem;
+      font-weight: 800;
+      letter-spacing: 0.28em;
+      padding-left: 0.28em;
+      color: #ea580c;
+      background: #fff7ed;
+      border: 2px dashed #fdba74;
+      border-radius: 14px;
+      padding-top: 10px;
+      padding-bottom: 10px;
+      text-align: center;
+      margin: 10px 0;
+    }
+    .camera-scan-box {
+      position: relative;
+      width: 100%;
+      height: 220px;
+      background: #0f172a;
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+    .camera-scan-box video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .camera-scan-frame {
+      position: absolute;
+      width: 154px;
+      height: 154px;
+      border: 2.5px solid #22c55e;
+      border-radius: 16px;
+      box-shadow: 0 0 0 999px rgba(15, 23, 42, 0.48);
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .camera-scan-laser {
+      position: absolute;
+      left: 6px;
+      right: 6px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #4ade80, transparent);
+      box-shadow: 0 0 8px #22c55e;
+      animation: qrLaserMove 2s ease-in-out infinite;
+    }
+    @keyframes qrLaserMove {
+      0%, 100% { top: 10px; }
+      50% { top: calc(100% - 12px); }
+    }
+    .pin-verify-input {
+      text-align: center;
+      font-size: 1.5rem !important;
+      font-weight: 800 !important;
+      letter-spacing: 0.32em;
+      padding-left: 0.32em !important;
+    }
+    .empty-state-box {
+      text-align: center;
+      padding: 20px 14px;
+      color: #475569;
+      font-size: 0.85rem;
+      line-height: 1.55;
+    }
+    .empty-state-icon {
+      font-size: 1.6rem;
+      margin-bottom: 6px;
+      display: block;
+    }
+  </style>
 </head>
 <body>
 
@@ -163,19 +516,19 @@
 
         <!-- Khung hiển thị khi người dùng đang phát tín hiệu SOS -->
         <div id="myActiveSosBanner" class="active-sos-banner" style="display: none;">
-          <div class="sos-banner-top">
-            <strong class="sos-banner-heading">🆘 BẠN ĐANG PHÁT TÍN HIỆU</strong>
-            <span id="myActiveSosStatusTag" class="sos-status-pill">Đang phát sóng...</span>
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px;">
+            <strong style="color: #be123c; font-size: 0.9rem;">🆘 BẠN ĐANG PHÁT TÍN HIỆU</strong>
+            <span id="myActiveSosStatusTag" style="font-size: 0.76rem; font-weight: 800; background: #fff; color: #e11d48; padding: 3px 10px; border-radius: 999px;">Đang phát sóng...</span>
           </div>
-          <div id="myActiveSosText" class="sos-banner-body"></div>
-          <div id="myActiveSosActions" class="sos-banner-actions">
-            <button type="button" class="btn-primary-full btn-emerald-solid btn-compact" id="showVerifyQrBtn">
+          <div id="myActiveSosText" style="font-size: 0.86rem; color: #1e293b; margin-bottom: 10px; line-height: 1.45;"></div>
+          <div id="myActiveSosActions" style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 8px;">
+            <button type="button" class="btn-primary-full" id="showVerifyQrBtn" style="background: #059669; font-size: 0.84rem; padding: 10px;">
               📱 Hiện mã xác nhận
             </button>
-            <button type="button" class="btn-primary-full btn-sky-solid btn-compact" id="chatWithMyHelperBtn" style="display: none;">
+            <button type="button" class="btn-primary-full" id="chatWithMyHelperBtn" style="display: none; background: #0284c7; font-size: 0.84rem; padding: 10px;">
               💬 Nhắn tin
             </button>
-            <button type="button" class="btn-secondary-full btn-compact" id="cancelMySosBtn">
+            <button type="button" class="btn-secondary-full" id="cancelMySosBtn" style="font-size: 0.84rem; padding: 10px;">
               Hủy
             </button>
           </div>
@@ -185,8 +538,8 @@
         <div class="gps-live-card">
           <div class="gps-card-top">
             <div class="gps-info-col">
-              <div class="gps-coords-text" id="gpsCoordsDisplay1">Chưa bật GPS • Mặc định ĐHSP Hà Nội</div>
-              <div class="gps-place-name" id="gpsDetectedPlace1">📍 Khu vực: Nhà hiệu bộ</div>
+              <div class="gps-coords-text" id="gpsCoordsDisplay1" style="font-size: 0.78rem;">Chưa bật GPS • Mặc định ĐHSP Hà Nội</div>
+              <div class="gps-place-name" id="gpsDetectedPlace1" style="font-size: 0.88rem;">📍 Khu vực: Nhà hiệu bộ</div>
             </div>
             <button type="button" class="gps-btn-action" id="enableRealGpsBtn1">
               <span>📡</span> <span id="enableRealGpsText1">Bật GPS thật</span>
@@ -195,8 +548,8 @@
 
           <div class="volunteer-toggle-row">
             <div>
-              <strong class="volunteer-toggle-title">Chế độ “Người Thắp Lửa”</strong>
-              <div class="volunteer-toggle-desc">Chia sẻ vị trí GPS của bạn lên hệ thống để sẵn sàng hỗ trợ</div>
+              <strong class="volunteer-toggle-title" style="font-size: 0.9rem;">Chế độ “Người Thắp Lửa”</strong>
+              <div class="volunteer-toggle-desc" style="font-size: 0.8rem;">Chia sẻ vị trí GPS của bạn lên hệ thống để sẵn sàng hỗ trợ</div>
             </div>
             <button type="button" class="switch-pill" id="volunteerBeaconSwitch" aria-label="Bật chế độ Người Thắp Lửa"></button>
           </div>
@@ -204,7 +557,7 @@
 
         <!-- Nút bấm khẩn cấp tỏa sóng -->
         <div class="sos-stage">
-          <p class="sos-lead">Chạm nút bên dưới để phát tín hiệu GPS và tìm người hỗ trợ quanh bạn</p>
+          <p class="sos-lead" style="font-size: 0.88rem;">Chạm nút bên dưới để phát tín hiệu GPS và tìm người hỗ trợ quanh bạn</p>
 
           <div class="sos-ripple-box">
             <div class="ripple-wave"></div>
@@ -219,7 +572,7 @@
             </button>
           </div>
 
-          <div class="sos-hint-text">
+          <div class="sos-hint-text" style="font-size: 0.82rem;">
             ⚡ Tự động tạo mã QR xác nhận &amp; gửi cảnh báo tới người trực tuyến
           </div>
         </div>
@@ -305,7 +658,7 @@
               placeholder="Mô tả ngắn gọn điều bạn đang cần hỗ trợ..."
             ></textarea>
 
-            <div class="nlp-status-box" id="nlpFeedbackBox">
+            <div class="nlp-status-box" id="nlpFeedbackBox" style="font-size: 0.82rem;">
               <span id="nlpFeedbackText">✓ AI NLP: Sẵn sàng kiểm duyệt nội dung</span>
               <button type="button" class="btn-nlp-fix" id="nlpAutoCleanBtn" style="display: none;">Xóa từ chưa phù hợp</button>
             </div>
@@ -331,23 +684,23 @@
         <!-- Tọa độ GPS đang quét -->
         <div class="radar-gps-strip">
           <div class="gps-info-col">
-            <div class="radar-gps-title" id="radarGpsTitle">📡 Tâm định vị: Khu vực ĐHSP Hà Nội</div>
-            <div class="radar-gps-exact" id="radarGpsExact">Lat: 21.03720° N | Lng: 105.78340° E</div>
+            <div class="radar-gps-title" id="radarGpsTitle" style="font-size: 0.84rem;">📡 Tâm định vị: Khu vực ĐHSP Hà Nội</div>
+            <div class="radar-gps-exact" id="radarGpsExact" style="font-size: 0.78rem;">Lat: 21.03720° N | Lng: 105.78340° E</div>
           </div>
-          <button type="button" id="refreshRadarBtn" class="btn-refresh-gps">
+          <button type="button" id="refreshRadarBtn" class="btn-refresh-gps" style="font-size: 0.8rem;">
             ↻ Làm mới GPS
           </button>
         </div>
 
         <!-- Chuyển đổi chế độ Radar / Bản đồ Tọa độ GPS -->
         <div class="view-mode-tabs">
-          <button type="button" class="view-mode-btn active" id="modeRadarBtn">🎯 Radar Đồng Tâm</button>
-          <button type="button" class="view-mode-btn" id="modeGpsMapBtn">🗺️ Bản Đồ Tọa Độ GPS</button>
+          <button type="button" class="view-mode-btn active" id="modeRadarBtn" style="font-size: 0.84rem;">🎯 Radar Đồng Tâm</button>
+          <button type="button" class="view-mode-btn" id="modeGpsMapBtn" style="font-size: 0.84rem;">🗺️ Bản Đồ Tọa Độ GPS</button>
         </div>
 
         <!-- CHẾ ĐỘ A: RADAR ĐỒNG TÂM -->
         <div class="radar-panel" id="radarViewPanel">
-          <div class="radar-header-bar">
+          <div class="radar-header-bar" style="font-size: 0.8rem;">
             <span class="radar-live-pill" id="radarScannerStatus">● ĐANG QUÉT TRỰC TUYẾN</span>
             <span>Tìm thấy: <strong id="nearbyCountBadge">0 người trực tuyến</strong></span>
           </div>
@@ -374,7 +727,7 @@
             <div id="dynamicRadarBlipsLayer"></div>
           </div>
 
-          <div class="radar-caption-hint">
+          <div class="radar-caption-hint" style="font-size: 0.78rem;">
             Chấm đỏ: Người cần hỗ trợ • Chấm xanh: Người Thắp Lửa đang trực tuyến
           </div>
         </div>
@@ -396,11 +749,11 @@
 
         <!-- Bộ lọc bán kính -->
         <div class="radius-filter-bar">
-          <strong class="filter-bar-title">Phạm vi quét:</strong>
+          <strong class="filter-bar-title" style="font-size: 0.84rem;">Phạm vi quét:</strong>
           <div class="filter-pills-group" id="radiusFilterPills">
-            <button type="button" class="radius-pill" data-max-dist="500">500m</button>
-            <button type="button" class="radius-pill" data-max-dist="2000">2km</button>
-            <button type="button" class="radius-pill active" data-max-dist="50000">Toàn khu vực</button>
+            <button type="button" class="radius-pill" data-max-dist="500" style="font-size: 0.8rem;">500m</button>
+            <button type="button" class="radius-pill" data-max-dist="2000" style="font-size: 0.8rem;">2km</button>
+            <button type="button" class="radius-pill active" data-max-dist="50000" style="font-size: 0.8rem;">Toàn khu vực</button>
           </div>
         </div>
 
@@ -421,9 +774,9 @@
         <div class="points-wallet-card">
           <div class="wallet-top">
             <div>
-              <div class="wallet-kicker">Thẻ Thắp Lửa Cá Nhân</div>
-              <div class="wallet-student-name" id="walletStudentName">Đang tải...</div>
-              <div class="wallet-student-meta" id="walletStudentMeta">...</div>
+              <div class="wallet-kicker" style="font-size: 0.78rem;">Thẻ Thắp Lửa Cá Nhân</div>
+              <div class="wallet-student-name" id="walletStudentName" style="font-size: 1.15rem;">Đang tải...</div>
+              <div class="wallet-student-meta" id="walletStudentMeta" style="font-size: 0.8rem;">...</div>
             </div>
             <span class="wallet-id-tag" id="walletIdTag">#HNUE</span>
           </div>
@@ -431,15 +784,15 @@
           <div class="wallet-score-row">
             <div>
               <span class="wallet-score-num" id="walletScoreNumber">0</span>
-              <span class="wallet-score-unit">Điểm Ấm</span>
+              <span class="wallet-score-unit" style="font-size: 0.9rem;">Điểm Ấm</span>
             </div>
-            <span class="wallet-goal-text">Mốc tiêu chuẩn: 200 điểm</span>
+            <span class="wallet-goal-text" style="font-size: 0.8rem;">Mốc tiêu chuẩn: 200 điểm</span>
           </div>
 
           <div class="sv5t-progress-bar">
             <div class="sv5t-progress-fill" id="sv5tProgressBar" style="width: 0%;"></div>
           </div>
-          <div class="sv5t-status-caption" id="sv5tProgressNote">
+          <div class="sv5t-status-caption" id="sv5tProgressNote" style="font-size: 0.8rem;">
             Còn 200 Điểm Ấm để đạt mốc ghi nhận tiêu biểu
           </div>
         </div>
@@ -447,23 +800,23 @@
         <!-- Chứng nhận điện tử -->
         <div class="certificate-box">
           <div class="cert-top-strip">
-            <span class="cert-issuer">Trường Đại học Sư phạm Hà Nội</span>
-            <span class="cert-valid-tag">✓ Xác thực mã QR</span>
+            <span class="cert-issuer" style="font-size: 0.8rem;">Trường Đại học Sư phạm Hà Nội</span>
+            <span class="cert-valid-tag" style="font-size: 0.78rem;">✓ Xác thực mã QR</span>
           </div>
 
-          <div class="cert-label-sm">CHỨNG NHẬN ĐIỆN TỬ</div>
-          <div class="cert-main-title">“NGƯỜI THẮP LỬA TIÊU BIỂU”</div>
-          <div class="cert-holder">Thành viên: <span id="certHolderName">...</span></div>
-          <p class="cert-summary">
+          <div class="cert-label-sm" style="font-size: 0.76rem;">CHỨNG NHẬN ĐIỆN TỬ</div>
+          <div class="cert-main-title" style="font-size: 1.05rem;">“NGƯỜI THẮP LỬA TIÊU BIỂU”</div>
+          <div class="cert-holder" style="font-size: 0.92rem;">Thành viên: <span id="certHolderName">...</span></div>
+          <p class="cert-summary" style="font-size: 0.84rem; line-height: 1.5;">
             Ghi nhận tinh thần xung kích, lan tỏa lối sống đẹp và hỗ trợ kịp thời trong cộng đồng Trường Đại học Sư phạm Hà Nội.
           </p>
 
-          <div class="cert-hash-row">
+          <div class="cert-hash-row" style="font-size: 0.8rem;">
             <span>Mã xác thực: <strong id="certHashCode">#WL-HNUE</strong></span>
             <span id="certTotalHelps">0 lượt hỗ trợ</span>
           </div>
 
-          <button type="button" class="btn-view-full-cert" id="openFullCertBtn">
+          <button type="button" class="btn-view-full-cert" id="openFullCertBtn" style="font-size: 0.88rem;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" aria-hidden="true">
               <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
             </svg>
@@ -473,7 +826,7 @@
 
         <!-- Lịch sử xác thực -->
         <div class="ui-card">
-          <strong class="card-section-title">Lịch sử hỗ trợ đã xác minh</strong>
+          <strong class="card-section-title" style="font-size: 0.92rem;">Lịch sử hỗ trợ đã xác minh</strong>
           <div id="verifiedHistoryList"></div>
         </div>
       </section>
@@ -521,14 +874,14 @@
             <circle class="heat-spot" cx="94" cy="156" r="28" fill="rgba(249,115,22,0.28)"/>
             <circle class="heat-spot" cx="266" cy="156" r="24" fill="rgba(52,211,153,0.22)"/>
           </svg>
-          <div class="campus-map-footer">
+          <div class="campus-map-footer" style="font-size: 0.82rem;">
             <span>🔥 Tổng lượt hỗ trợ toàn trường: <strong class="text-orange-light" id="weeklySparksCount">0</strong></span>
             <span>● Đồng bộ trực tiếp</span>
           </div>
         </div>
 
         <div class="ui-card">
-          <strong class="card-section-title">Bảng xếp hạng Khoa / Đơn vị</strong>
+          <strong class="card-section-title" style="font-size: 0.92rem;">Bảng xếp hạng Khoa / Đơn vị</strong>
           <div id="facultyLeaderboardList"></div>
         </div>
       </section>
@@ -544,8 +897,8 @@
 
         <div class="qr-box-center">
           <div class="qr-svg-holder" id="mobileQrHolder"></div>
-          <strong class="qr-main-heading">QUÉT MÃ ĐỂ TRUY CẬP NHANH</strong>
-          <span id="qrLinkCaption" class="qr-link-caption"></span>
+          <strong class="qr-main-heading" style="font-size: 0.95rem;">QUÉT MÃ ĐỂ TRUY CẬP NHANH</strong>
+          <span id="qrLinkCaption" class="qr-link-caption" style="font-size: 0.8rem;"></span>
         </div>
 
         <div class="ui-card card-stack-sm">
@@ -559,8 +912,8 @@
           </button>
         </div>
 
-        <div class="ui-card guide-card-text">
-          <strong class="card-section-title">Quy trình kết nối &amp; xác minh</strong>
+        <div class="ui-card guide-card-text" style="font-size: 0.86rem; line-height: 1.6;">
+          <strong class="card-section-title" style="font-size: 0.94rem;">Quy trình kết nối &amp; xác minh</strong>
           <div>1. <strong>Phát tín hiệu:</strong> Chọn địa điểm tại HNUE và gửi yêu cầu hỗ trợ. Hệ thống tự động tạo mã QR &amp; mã PIN 4 số riêng cho lượt hỗ trợ này.</div>
           <div>2. <strong>Tiếp nhận hỗ trợ:</strong> Người Thắp Lửa xung quanh nhận thông báo trên Radar GPS, nhắn tin trao đổi và đến hỗ trợ.</div>
           <div>3. <strong>Quét mã xác minh:</strong> Khi giúp xong, người được giúp bấm <em>Hiện mã xác nhận</em> để người hỗ trợ quét QR (hoặc nhập mã 4 số), xác thực lượt giúp hợp lệ và cộng <strong>+25 Điểm Ấm</strong>.</div>
@@ -617,16 +970,16 @@
 
   <!-- MODAL A: NGƯỜI ĐƯỢC GIÚP HIỆN MÃ QR & MÃ 4 SỐ XÁC NHẬN -->
   <div class="modal-overlay" id="showVerifyQrModal" role="dialog" aria-modal="true" aria-labelledby="showVerifyQrTitle">
-    <div class="bottom-sheet-modal text-center-modal">
+    <div class="bottom-sheet-modal" style="text-align: center;">
       <div class="sheet-handle"></div>
-      <h2 id="showVerifyQrTitle" class="modal-title">📱 Mã Xác Nhận Hoàn Thành</h2>
-      <p class="modal-desc">
+      <h2 id="showVerifyQrTitle" class="modal-title" style="font-size: 1.12rem;">📱 Mã Xác Nhận Hoàn Thành</h2>
+      <p class="modal-desc" style="font-size: 0.84rem;">
         Đưa mã QR này cho người hỗ trợ quét (hoặc đọc mã 4 số bên dưới) sau khi đã được giúp đỡ xong
       </p>
 
-      <div class="qr-svg-holder modal-qr-center" id="sosVerifyQrHolder"></div>
+      <div class="qr-svg-holder" id="sosVerifyQrHolder" style="margin: 10px auto;"></div>
 
-      <div class="verify-pin-caption">MÃ XÁC NHẬN NHANH 4 SỐ</div>
+      <div style="font-size: 0.8rem; font-weight: 700; color: #475569; margin-top: 6px;">MÃ XÁC NHẬN NHANH 4 SỐ</div>
       <div class="verify-pin-display" id="sosVerifyPinText">----</div>
 
       <button type="button" class="btn-secondary-full" id="closeShowVerifyQrBtn">Đóng</button>
@@ -637,8 +990,8 @@
   <div class="modal-overlay" id="scanVerifyQrModal" role="dialog" aria-modal="true" aria-labelledby="scanVerifyQrTitle">
     <div class="bottom-sheet-modal">
       <div class="sheet-handle"></div>
-      <h2 id="scanVerifyQrTitle" class="modal-title">📷 Xác Minh Hoàn Thành Hỗ Trợ</h2>
-      <p class="modal-desc" id="scanVerifyTargetDesc">
+      <h2 id="scanVerifyQrTitle" class="modal-title" style="font-size: 1.12rem;">📷 Xác Minh Hoàn Thành Hỗ Trợ</h2>
+      <p class="modal-desc" id="scanVerifyTargetDesc" style="font-size: 0.84rem;">
         Hướng camera vào mã QR trên máy người được giúp hoặc nhập mã 4 số
       </p>
 
@@ -648,29 +1001,29 @@
           <div class="camera-scan-laser"></div>
         </div>
       </div>
-      <div id="cameraScanStatus" class="camera-scan-status">
+      <div id="cameraScanStatus" style="text-align: center; font-size: 0.78rem; color: #475569; margin-bottom: 10px;">
         Đang mở camera quét mã QR...
       </div>
 
       <div class="field-block">
-        <label class="field-label label-center" for="manualVerifyPinInput">Hoặc nhập mã 4 số từ người được giúp</label>
+        <label class="field-label" for="manualVerifyPinInput" style="justify-content: center;">Hoặc nhập mã 4 số từ người được giúp</label>
         <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" id="manualVerifyPinInput" class="mobile-input pin-verify-input" placeholder="0000" />
       </div>
 
       <div class="modal-btn-grid">
         <button type="button" class="btn-secondary-full" id="closeScanVerifyQrBtn">Đóng</button>
-        <button type="button" class="btn-primary-full btn-emerald-solid" id="submitVerifyPinBtn">✓ Xác minh (+25đ)</button>
+        <button type="button" class="btn-primary-full" id="submitVerifyPinBtn" style="background: #059669;">✓ Xác minh (+25đ)</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL 1: THÔNG TIN TÀI KHOẢN -->
+  <!-- MODAL 1: THÔNG TIN TÀI KHOẢN & QUẢN TRỊ CSDL -->
   <div class="modal-overlay" id="profileModal" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
     <div class="bottom-sheet-modal">
       <div class="sheet-handle"></div>
-      <h2 id="profileModalTitle" class="modal-title">Hồ Sơ Thành Viên</h2>
-      <p class="modal-desc">
-        Cập nhật thông tin hiển thị khi kết nối hỗ trợ trong trường
+      <h2 id="profileModalTitle" class="modal-title" style="font-size: 1.12rem;">Hồ Sơ Thành Viên</h2>
+      <p class="modal-desc" style="font-size: 0.84rem;">
+        Dữ liệu đồng bộ trực tiếp với cơ sở dữ liệu hệ thống
       </p>
 
       <div class="field-block">
@@ -728,11 +1081,47 @@
         <button type="button" class="btn-primary-full" id="saveProfileBtn">Lưu hồ sơ</button>
       </div>
 
-      <div class="logout-row">
-        <button type="button" class="btn-secondary-full btn-logout-danger" id="logoutAccountBtn">
-          🚪 Đăng xuất tài khoản
+      <div style="margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+        <button type="button" class="btn-secondary-full" id="openDbControlBtn" style="font-size: 0.84rem;">
+          🗄️ Kiểm soát CSDL
+        </button>
+        <button type="button" class="btn-secondary-full" id="logoutAccountBtn" style="font-size: 0.84rem; color: #dc2626; border-color: #fecaca;">
+          🚪 Đăng xuất
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- MODAL 1B: BẢNG KIỂM SOÁT CƠ SỞ DỮ LIỆU -->
+  <div class="modal-overlay" id="dbControlModal" role="dialog" aria-modal="true" aria-labelledby="dbControlTitle">
+    <div class="bottom-sheet-modal">
+      <div class="sheet-handle"></div>
+      <h2 id="dbControlTitle" class="modal-title" style="font-size: 1.12rem;">🗄️ Kiểm Soát Cơ Sở Dữ Liệu</h2>
+      <p class="modal-desc" style="font-size: 0.84rem;">Giám sát toàn bộ tài khoản, vị trí GPS và tín hiệu SOS trực tiếp</p>
+
+      <div class="db-stats-grid">
+        <div class="db-stat-tile">
+          <div class="db-stat-num" id="dbStatUsers">0</div>
+          <div class="db-stat-label">Tài khoản đăng ký</div>
+        </div>
+        <div class="db-stat-tile">
+          <div class="db-stat-num" id="dbStatBeacons" style="color: #059669;">0</div>
+          <div class="db-stat-label">Người Thắp Lửa online</div>
+        </div>
+        <div class="db-stat-tile">
+          <div class="db-stat-num" id="dbStatSos" style="color: #e11d48;">0</div>
+          <div class="db-stat-label">Tín hiệu SOS đang mở</div>
+        </div>
+        <div class="db-stat-tile">
+          <div class="db-stat-num" id="dbStatHelps" style="color: #0284c7;">0</div>
+          <div class="db-stat-label">Lượt hỗ trợ xác minh</div>
+        </div>
+      </div>
+
+      <strong class="card-section-title" style="font-size: 0.88rem;">Danh sách tín hiệu SOS đang hoạt động:</strong>
+      <div id="dbLiveSosAdminList" style="max-height: 190px; overflow-y: auto; margin-bottom: 12px;"></div>
+
+      <button type="button" class="btn-secondary-full" id="closeDbControlBtn">Đóng bảng kiểm soát</button>
     </div>
   </div>
 
@@ -742,19 +1131,19 @@
       <div class="sheet-handle"></div>
       <div class="chat-modal-header">
         <div>
-          <h2 class="modal-title" id="chatPartnerName">Kết nối trực tiếp</h2>
-          <div class="chat-meta-verified" id="chatPartnerMeta">
+          <h2 class="modal-title" id="chatPartnerName" style="font-size: 1.05rem;">Kết nối trực tiếp</h2>
+          <div class="chat-meta-verified" id="chatPartnerMeta" style="font-size: 0.78rem;">
             ✓ Đã xác thực tài khoản • Bảo mật số điện thoại
           </div>
         </div>
-        <button type="button" id="closeChatModalBtn" class="btn-close-modal">✕ Đóng</button>
+        <button type="button" id="closeChatModalBtn" class="btn-close-modal" style="font-size: 0.82rem;">✕ Đóng</button>
       </div>
 
-      <div class="chat-messages-box" id="chatMessagesBox"></div>
+      <div class="chat-messages-box" id="chatMessagesBox" style="font-size: 0.9rem;"></div>
 
       <div class="chat-input-row">
         <input type="text" id="chatInputBox" class="mobile-input chat-text-input" placeholder="Nhập tin nhắn..." />
-        <button type="button" id="sendChatBtn" class="btn-send-chat">Gửi</button>
+        <button type="button" id="sendChatBtn" class="btn-send-chat" style="font-size: 0.9rem;">Gửi</button>
       </div>
     </div>
   </div>
@@ -765,18 +1154,18 @@
       <div class="sheet-handle no-print"></div>
 
       <div class="printable-cert">
-        <div class="print-cert-org">TRƯỜNG ĐẠI HỌC SƯ PHẠM HÀ NỘI</div>
-        <div class="print-cert-sub">Nền tảng Kết nối Tử tế &amp; Minh chứng Số HNUE WarmLink</div>
+        <div class="print-cert-org" style="font-size: 0.8rem;">TRƯỜNG ĐẠI HỌC SƯ PHẠM HÀ NỘI</div>
+        <div class="print-cert-sub" style="font-size: 0.78rem;">Nền tảng Kết nối Tử tế &amp; Minh chứng Số HNUE WarmLink</div>
 
-        <div class="print-cert-kicker">CHỨNG NHẬN ĐIỆN TỬ</div>
-        <h2 id="certSheetTitle" class="print-cert-heading">NGƯỜI THẮP LỬA TIÊU BIỂU</h2>
-        <p class="print-cert-lead">Trân trọng chứng nhận:</p>
-        <div class="print-cert-name" id="sheetHolderName">...</div>
-        <div class="print-cert-meta" id="sheetHolderMeta">...</div>
-        <p class="print-cert-body">
+        <div class="print-cert-kicker" style="font-size: 0.78rem;">CHỨNG NHẬN ĐIỆN TỬ</div>
+        <h2 id="certSheetTitle" class="print-cert-heading" style="font-size: 1.25rem;">NGƯỜI THẮP LỬA TIÊU BIỂU</h2>
+        <p class="print-cert-lead" style="font-size: 0.86rem;">Trân trọng chứng nhận:</p>
+        <div class="print-cert-name" id="sheetHolderName" style="font-size: 1.2rem;">...</div>
+        <div class="print-cert-meta" id="sheetHolderMeta" style="font-size: 0.82rem;">...</div>
+        <p class="print-cert-body" style="font-size: 0.86rem; line-height: 1.55;">
           Đã tích lũy <strong id="sheetPointsValue" class="text-orange-bold">0 Điểm Ấm</strong> qua các hoạt động hỗ trợ cộng đồng tại Trường Đại học Sư phạm Hà Nội, được xác minh trực tiếp qua mã QR trên hệ thống.
         </p>
-        <div class="print-cert-footer">
+        <div class="print-cert-footer" style="font-size: 0.8rem;">
           <span>Mã số: <strong id="sheetCertCode">#WL-HNUE</strong></span>
           <span>Trạng thái: <strong class="text-emerald-bold">Đã xác minh</strong></span>
         </div>
@@ -790,10 +1179,9 @@
   </div>
 
   <!-- TOAST THÔNG BÁO -->
-  <div class="toast-msg" id="mobileToast" role="status" aria-live="polite"></div>
+  <div class="toast-msg" id="mobileToast" role="status" aria-live="polite" style="font-size: 0.88rem;"></div>
 
-  <!-- Thư viện tạo mã QR chuẩn & nhận diện mã QR đa nền tảng -->
-  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+  <!-- Thư viện nhận diện mã QR đa nền tảng (iOS Safari, Android, Desktop) -->
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
   <!-- Firebase App, Authentication & Realtime Database SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
