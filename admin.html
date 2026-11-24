@@ -811,10 +811,10 @@
         // 2. 4 Khu vực
         const areas = stateStats.areas || {};
         const zoneDefs = [
-          { key: 'hanh_chinh', label: 'Khu Hành chính (Hiệu bộ, Thư viện, HT 11.10)' },
-          { key: 'giang_duong', label: 'Khu Giảng đường (A2–A4, B, C, D, H8, K, M, N, V)' },
-          { key: 'ky_tuc_xa', label: 'Khu Ký túc xá (A5 – A12, Phòng y tế, Căng tin)' },
-          { key: 'khu_vuc_khac', label: 'Các khu vực khác (Chùa Thánh Chúa, Sân, Vườn...)' }
+          { key: 'hanh_chinh', label: 'Khu Hành chính' },
+          { key: 'giang_duong', label: 'Khu Giảng đường' },
+          { key: 'ky_tuc_xa', label: 'Khu Ký túc xá' },
+          { key: 'khu_vuc_khac', label: 'Các khu vực khác' }
         ];
         const maxZone = Math.max(1, ...zoneDefs.map((z) => Number(areas[z.key] || 0)));
         document.getElementById('overviewZonesBreakdown').innerHTML = zoneDefs
