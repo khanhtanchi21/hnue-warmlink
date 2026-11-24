@@ -329,6 +329,10 @@
       <button type="button" class="btn btn-outline btn-full" id="btnAdminGoogleLogin">
         Đăng nhập bằng Google / Gmail Quản trị
       </button>
+      
+      <button type="button" class="btn btn-full" id="btnAdminBgkDemo" style="margin-top: 10px; background: #ecfdf5; color: #047857; border: 1.5px solid #a7f3d0;">
+        🎓 Vào nhanh chế độ Ban Giám Khảo 
+      </button>
 
       <div style="margin-top: 16px; text-align: center;">
         <a href="index.html" style="font-size: 0.8rem; color: #475569; text-decoration: none;">← Quay lại trang người dùng</a>
@@ -643,6 +647,28 @@
           setAuthErrorHtml('Lỗi đăng nhập Google: ' + esc(err.message));
         }
       });
+
+      // DÁN NGAY BÊN DƯỚI DẤU }); Ở CUỐI ẢNH CỦA BẠN
+      const BGK_DEMO_EMAIL = 'bgk@hnue-warmlink.vn';
+      const BGK_DEMO_PASS = 'WarmLink@2026';
+
+      async function loginAsBgkDemo() {
+        setAuthErrorHtml('');
+        const demoBtn = document.getElementById('btnAdminBgkDemo');
+        if (demoBtn) demoBtn.textContent = '⏳ Đang mở quyền Ban Giám Khảo...';
+        try {
+          await auth.signInWithEmailAndPassword(BGK_DEMO_EMAIL, BGK_DEMO_PASS);
+        } catch (err) {
+          if (demoBtn) demoBtn.textContent = '🎓 Vào nhanh chế độ Ban Giám Khảo (1 chạm)';
+          setAuthErrorHtml('Không thể đăng nhập tự động: ' + esc(err.message));
+        }
+      }
+
+      document.getElementById('btnAdminBgkDemo').addEventListener('click', loginAsBgkDemo);
+
+      if (new URLSearchParams(window.location.search).get('demo') === 'bgk') {
+        loginAsBgkDemo();
+      }
 
       document.getElementById('btnAdminLogout').addEventListener('click', async () => {
         await writeAuditLog('LOGOUT', 'Quản trị viên chủ động đăng xuất');
